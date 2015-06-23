@@ -1,37 +1,46 @@
 package sublandroid;
 
 import sublandroid.messages.*;
+import static sublandroid.Path.*;
+import static sublandroid.Util.*;
 
 import java.io.*;
 
 import org.testng.annotations.*;
 
-import static org.assertj.core.api.Assertions.*;
-import static sublandroid.Path.*;
-import static sublandroid.Util.*;
+import com.alibaba.fastjson.TypeReference;
 
-import com.fasterxml.jackson.databind.*;
+import static org.assertj.core.api.Assertions.*;
+
 
 public class ConnectorTest {
 
+	public static final String PROJECT_01 = "./test-data/simple-01";
+	public static final long timeOutDefault = 5000;
 
-	@Test(timeOut=1000)
-	public void loadValidDirectory() throws Exception {
-		final Connector connector = new Connector(join("./test-data/simple-01"));
+	@Test(timeOut=timeOutDefault)
+	public void helloCommand() throws Exception {
+		Context context = new Context(PROJECT_01);
 
-		final PipedWriter outputWriter = new PipedWriter();
-		final PipedReader outputReader = new PipedReader(outputWriter);
+		context.run();
 
-		final PipedWriter inputWriter = new PipedWriter();
-		final BufferedReader inputReader = new BufferedReader(new PipedReader(inputWriter));
+		send(MCommand.from("start"), context.writer);
 
-		final Runner runner = new Runner(connector, outputReader, inputWriter);
-
-		send(MCommand.from("start"), outputWriter);
-
-		Started response = read(inputReader, Started.class);
+		MHello response = read(context.reader, MHello.class);
 
 		assertThat(response.message).isEqualTo("Woohoo!");
+		assertThat(response.gradleVersion).isEqualTo("2.4");
 	}
+
+	@Test(timeOut=timeOutDefault)
+	public void tasksCommand() throws Exception {
+		Context context = new Context(PROJECT_01);
+		context.run();
+
+		send(MCommand.from("showTasks"), context.writer);
+
+		MList<MTask> tasks = read(context.reader, LIST_TASKS);
+	}
+
 
 }

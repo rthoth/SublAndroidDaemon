@@ -23,7 +23,7 @@ test {
 
 dependencies {
 	compile 'org.gradle:gradle-tooling-api:2.4'
-	compile 'com.fasterxml.jackson.core:jackson-databind:2.6.0-rc2'
+	compile 'com.alibaba:fastjson:1.2.6'
 	testCompile 'org.testng:testng:6.9.4'
 	testCompile 'org.assertj:assertj-core:2.1.0'
 }

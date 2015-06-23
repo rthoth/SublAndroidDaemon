@@ -1,4 +1,4 @@
-package sublandroid;
+package sublandroid.messages;
 
 import java.util.*;
 

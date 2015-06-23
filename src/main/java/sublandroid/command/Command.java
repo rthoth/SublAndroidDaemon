@@ -1,4 +1,4 @@
-package sublandroid;
+package sublandroid.command;
 
 import sublandroid.messages.*;
 import org.gradle.tooling.*;

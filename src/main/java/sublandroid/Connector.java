@@ -1,12 +1,16 @@
 package sublandroid;
 
 import sublandroid.messages.*;
+import sublandroid.command.*;
 
 import static java.lang.String.format;
 import java.io.*;
 
 import org.gradle.tooling.*;
-import com.fasterxml.jackson.databind.*;
+import static com.alibaba.fastjson.JSON.parseObject;
+import static com.alibaba.fastjson.JSON.writeJSONStringTo;
+import static com.alibaba.fastjson.serializer.SerializerFeature.*;
+
 
 
 public class Connector {
@@ -18,10 +22,8 @@ public class Connector {
 	private boolean listen = false;
 	private BufferedReader reader = null;
 	private BufferedWriter writer = null;
-	protected ProjectConnection projectConnection = null;
 
-	private ObjectMapper mapper = null;
-	private JavaType mCommandType = null;
+	protected ProjectConnection projectConnection = null;
 
 	public static void main(String args[]) {
 		try {
@@ -63,8 +65,6 @@ public class Connector {
 		listen = true;
 		this.reader = (reader instanceof BufferedReader) ? (BufferedReader) reader : new BufferedReader(reader);
 		this.writer = (writer instanceof BufferedWriter) ? (BufferedWriter) writer : new BufferedWriter(writer);
-		this.mapper = new ObjectMapper();
-		this.mCommandType = mapper.constructType(MCommand.class);
 
 		while(true) {
 			try {
@@ -84,7 +84,7 @@ public class Connector {
 		}
 
 		try {
-			mapper.writeValue(writer, message);
+			writeJSONStringTo(message, writer);
 			writer.write('\n');
 			writer.flush();
 		} catch (Throwable throwable) {
@@ -93,12 +93,20 @@ public class Connector {
 	}
 
 	private void run(final String line) throws IOException {
-		final MCommand mCommand = mapper.readValue(line, mCommandType);
+		final MCommand mCommand = parseObject(line, MCommand.class);
 
+		Command command = null;
 		switch(mCommand.command) {
-			case Start.COMMAND:
-				execute(new Start(), mCommand);
+			case Hello.COMMAND:
+				command = new Hello();
+				break;
+			case ShowTasks.COMMAND:
+				command = new ShowTasks();
+				break;
 		}
+
+		if (command != null)
+			execute(command, mCommand);
 	}
 
 }
