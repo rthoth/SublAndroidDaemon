@@ -5,6 +5,7 @@ import sublandroid.command.*;
 
 import static java.lang.String.format;
 import java.io.*;
+import java.net.*;
 
 import org.gradle.tooling.*;
 import static com.alibaba.fastjson.JSON.parseObject;
@@ -13,25 +14,75 @@ import static com.alibaba.fastjson.serializer.SerializerFeature.*;
 
 
 
-public class Connector {
+public class Connector implements AutoCloseable {
+
+	private static class Server implements Runnable, AutoCloseable {
+
+		private final Connector connector;
+		private final int port;
+		private ServerSocket serverSocket;
+		private Socket clientSocket;
+
+		private Writer clientWriter;
+		private Reader clientReader;
+
+		public Server(final Connector connector, final int port) {
+			this.connector = connector;
+			this.port = port;
+		}
+
+		@Override
+		public void close() {
+
+			IOUtils.close(serverSocket);
+			IOUtils.close(clientSocket);
+			IOUtils.close(clientWriter);
+			IOUtils.close(clientReader);
+		}
+
+		@Override
+		public void run() {
+			try {
+				serverSocket = new ServerSocket(port, 1, InetAddress.getLoopbackAddress());
+				while (true) {
+					println("SublAndroid listen @ %d", serverSocket.getLocalPort());
+					clientSocket = serverSocket.accept();
+					println("A new sublandroid developer!");
+
+					clientReader = new InputStreamReader(clientSocket.getInputStream());
+					clientWriter = new OutputStreamWriter(clientSocket.getOutputStream());
+					connector.listen(clientReader, clientWriter);
+				}
+			} catch (Throwable throwable) {
+				throwable.printStackTrace();
+			}
+		}
+	}
 
 	protected static void println(String msg, Object... args) {
 		System.out.println(format(msg, args));
 	}
 
-	private boolean listen = false;
-	private BufferedReader reader = null;
-	private BufferedWriter writer = null;
-
-	protected ProjectConnection projectConnection = null;
-
 	public static void main(String args[]) {
 		try {
-			new Connector(args[0]);
+			final Connector connector = new Connector(args[0]);
+
+			int port = 0;
+			if (args.length > 1)
+				port = Integer.parseInt(args[1]);
+
+			connector.listen(port);
+
 		} catch (Throwable throwable) {
 			throwable.printStackTrace();
 		}
 	}
+
+	private BufferedReader reader = null;
+	private BufferedWriter writer = null;
+	private Thread serverThread = null;
+	private Server server = null;
+	protected ProjectConnection projectConnection = null;
 
 	public Connector(String file) throws IOException {
 		if (file == null)
@@ -47,6 +98,20 @@ public class Connector {
 		fromDirectory(file);
 	}
 
+	@Override
+	public void close() {
+		println("Closing...");
+		
+		if (server != null)
+			server.close();
+
+		projectConnection.close();
+		IOUtils.close(reader);
+		IOUtils.close(writer);
+
+		println("Closed");
+	}
+
 	private void fromDirectory(File directory) throws IOException {
 		if (!directory.isDirectory())
 			throw new IOException(format("%s must be a directory", directory.getCanonicalPath()));
@@ -58,11 +123,19 @@ public class Connector {
 		}
 	}
 
-	public synchronized void listen(Reader reader, Writer writer) throws IOException {
-		if (listen)
+	public synchronized void listen(final int port) {
+
+		if (server != null)
 			throw new IllegalStateException();
 
-		listen = true;
+		server = new Server(this, port);
+		serverThread = new Thread(server, "SublAndroidListener");
+		serverThread.start();
+
+	}
+
+	public synchronized void listen(Reader reader, Writer writer) throws IOException {
+
 		this.reader = (reader instanceof BufferedReader) ? (BufferedReader) reader : new BufferedReader(reader);
 		this.writer = (writer instanceof BufferedWriter) ? (BufferedWriter) writer : new BufferedWriter(writer);
 
@@ -78,7 +151,9 @@ public class Connector {
 	private void execute(final Command command, final MCommand mCommand) {
 		Message message = null;
 		try {
+			println("Trying %s", mCommand.command);
 			message = command.execute(mCommand, projectConnection);
+			println("Executed %s", mCommand.command);
 		} catch (Throwable throwable) {
 			message = new MFailure(throwable);
 		}
@@ -94,6 +169,7 @@ public class Connector {
 
 	private void run(final String line) throws IOException {
 		final MCommand mCommand = parseObject(line, MCommand.class);
+		println("Searching %s", mCommand.command);
 
 		Command command = null;
 		switch(mCommand.command) {

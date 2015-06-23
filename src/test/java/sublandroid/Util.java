@@ -4,6 +4,7 @@ import sublandroid.messages.*;
 import static sublandroid.Path.*;
 
 import java.io.*;
+import java.net.*;
 
 import com.alibaba.fastjson.TypeReference;
 
@@ -17,7 +18,7 @@ public abstract class Util {
 	};
 
 
-	public static class Context {
+	public static class Context implements AutoCloseable {
 
 		private final PipedWriter outputWriter;
 		private final PipedReader outputReader;
@@ -53,6 +54,45 @@ public abstract class Util {
 
 			return runner;
 		}
+
+		@Override
+		public void close() {
+			IOUtils.close(connector);
+			IOUtils.close(reader);
+			IOUtils.close(writer);
+		}
+	}
+
+	public static class ClientContext implements AutoCloseable {
+
+		public final Connector connector;
+		public final int port;
+		public final Socket socket;
+		public final BufferedWriter writer;
+		public final BufferedReader reader;
+
+		public ClientContext(String path, int port) throws Throwable {
+			connector = new Connector(path);
+			this.port = port;
+
+			connector.listen(port);
+
+			Thread.sleep(500);
+
+			socket = new Socket(InetAddress.getLoopbackAddress(), port);
+
+			writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		}
+
+		@Override
+		public void close() {
+			connector.close();
+			IOUtils.close(writer);
+			IOUtils.close(reader);
+			IOUtils.close(socket);
+		}
+
 	}
 
 	public static class Runner implements Runnable {

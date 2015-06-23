@@ -11,8 +11,6 @@ public class ShowTasks extends Command {
 
 	@Override
 	public Message execute(MCommand mCommand, ProjectConnection connection) {
-		System.out.println(this.toString());
-
 		GradleProject gradleProject = connection.getModel(GradleProject.class);
 
 		MList tasks = new MList<MTask>();

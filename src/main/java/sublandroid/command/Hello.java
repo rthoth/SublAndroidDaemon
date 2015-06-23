@@ -6,7 +6,7 @@ import org.gradle.tooling.*;
 import org.gradle.tooling.model.build.*;
 
 public class Hello extends Command {
-	public static final String COMMAND = "start";
+	public static final String COMMAND = "hello";
 
 
 	@Override
