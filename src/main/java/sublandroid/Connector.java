@@ -64,6 +64,9 @@ public class Connector implements AutoCloseable {
 	}
 
 	public static void main(String args[]) {
+		if (args.length == 0)
+			throw new IllegalArgumentException("Need a gradle project folder");
+
 		try {
 			final Connector connector = new Connector(args[0]);
 
