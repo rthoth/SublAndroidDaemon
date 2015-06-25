@@ -45,9 +45,9 @@ public class Connector implements AutoCloseable {
 			try {
 				serverSocket = new ServerSocket(port, 1, InetAddress.getLoopbackAddress());
 				while (true) {
-					println("SublAndroid listen @ %d", serverSocket.getLocalPort());
+					connector.println("SublAndroid listen @ %d", serverSocket.getLocalPort());
 					clientSocket = serverSocket.accept();
-					println("A new sublandroid developer!");
+					connector.println("A new sublandroid developer!");
 
 					clientReader = new InputStreamReader(clientSocket.getInputStream());
 					clientWriter = new OutputStreamWriter(clientSocket.getOutputStream());
@@ -59,16 +59,20 @@ public class Connector implements AutoCloseable {
 		}
 	}
 
-	protected static void println(String msg, Object... args) {
-		System.out.println(format(msg, args));
-	}
+	protected final String DEBUG_PREFIX = "sublandroid_";
+	protected final String DEBUG_SUFIX = ".log";
 
 	public static void main(String args[]) {
 		if (args.length == 0)
 			throw new IllegalArgumentException("Need a gradle project folder");
 
 		try {
-			final Connector connector = new Connector(args[0]);
+			boolean debug = false;
+			System.out.println(args);
+			if (args.length > 2)
+				debug = "debug".equals(args[2]);
+
+			final Connector connector = new Connector(args[0], debug);
 
 			int port = 0;
 			if (args.length > 1)
@@ -81,22 +85,41 @@ public class Connector implements AutoCloseable {
 		}
 	}
 
-	private BufferedReader reader = null;
-	private BufferedWriter writer = null;
-	private Thread serverThread = null;
-	private Server server = null;
+	protected final PrintStream debugStream;
+
 	protected ProjectConnection projectConnection = null;
 
+	private BufferedReader reader = null;
+	private Server server = null;
+	private Thread serverThread = null;
+	private BufferedWriter writer = null;
+
 	public Connector(String file) throws IOException {
+		this(file, false);
+	}
+
+	public Connector(String file, boolean debug) throws IOException {
 		if (file == null)
 			throw new NullPointerException("File Path is null");
+
+		if (debug) {
+			File debugFile = File.createTempFile(DEBUG_PREFIX, DEBUG_SUFIX);
+			this.debugStream = new PrintStream(new FileOutputStream(debugFile, true), true);
+		} else
+			this.debugStream = System.out;
+
 
 		fromDirectory(new File(file));
 	}
 
-	public Connector(File file) throws IOException {
+	public Connector(File file, boolean debug) throws IOException {
 		if (file == null)
 			throw new NullPointerException("File is null");
+
+		if (debug)
+			this.debugStream = new PrintStream(new FileOutputStream(File.createTempFile("sublandroid", "lob"), true), true);
+		else
+			this.debugStream = System.out;
 
 		fromDirectory(file);
 	}
@@ -115,6 +138,25 @@ public class Connector implements AutoCloseable {
 		println("Closed");
 	}
 
+	private void execute(final Command command, final MCommand mCommand) {
+		Message message = null;
+		try {
+			println("Trying %s", mCommand.command);
+			message = command.execute(mCommand, projectConnection);
+			println("Executed %s", mCommand.command);
+		} catch (Throwable throwable) {
+			message = new MFailure(throwable);
+		}
+
+		try {
+			writeJSONStringTo(message, writer);
+			writer.write('\n');
+			writer.flush();
+		} catch (Throwable throwable) {
+			throw new Error(throwable);
+		}
+	}
+
 	private void fromDirectory(File directory) throws IOException {
 		if (!directory.isDirectory())
 			throw new IOException(format("%s must be a directory", directory.getCanonicalPath()));
@@ -122,7 +164,7 @@ public class Connector implements AutoCloseable {
 		try {
 			projectConnection = GradleConnector.newConnector().forProjectDirectory(directory).connect();
 		} catch (RuntimeException exception) {
-			System.out.println(format("Trying start gradle at %s", directory.getCanonicalPath()));
+			println(format("Trying start gradle at %s", directory.getCanonicalPath()));
 		}
 	}
 
@@ -151,23 +193,8 @@ public class Connector implements AutoCloseable {
 		}
 	}
 
-	private void execute(final Command command, final MCommand mCommand) {
-		Message message = null;
-		try {
-			println("Trying %s", mCommand.command);
-			message = command.execute(mCommand, projectConnection);
-			println("Executed %s", mCommand.command);
-		} catch (Throwable throwable) {
-			message = new MFailure(throwable);
-		}
-
-		try {
-			writeJSONStringTo(message, writer);
-			writer.write('\n');
-			writer.flush();
-		} catch (Throwable throwable) {
-			throw new Error(throwable);
-		}
+	protected void println(String msg, Object... args) {
+		this.debugStream.println(format(msg, args));
 	}
 
 	private void run(final String line) throws IOException {
