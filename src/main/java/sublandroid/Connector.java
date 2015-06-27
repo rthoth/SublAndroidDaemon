@@ -59,6 +59,10 @@ public class Connector implements AutoCloseable {
 		}
 	}
 
+	protected static void println(String msg, Object... args) {
+		System.out.println(format(msg, args));
+	}
+
 	protected final String DEBUG_PREFIX = "sublandroid_";
 	protected final String DEBUG_SUFIX = ".log";
 
@@ -68,7 +72,6 @@ public class Connector implements AutoCloseable {
 
 		try {
 			boolean debug = false;
-			System.out.println(args);
 			if (args.length > 2)
 				debug = "debug".equals(args[2]);
 
@@ -85,8 +88,6 @@ public class Connector implements AutoCloseable {
 		}
 	}
 
-	protected final PrintStream debugStream;
-
 	protected ProjectConnection projectConnection = null;
 
 	private BufferedReader reader = null;
@@ -102,12 +103,7 @@ public class Connector implements AutoCloseable {
 		if (file == null)
 			throw new NullPointerException("File Path is null");
 
-		if (debug) {
-			File debugFile = File.createTempFile(DEBUG_PREFIX, DEBUG_SUFIX);
-			this.debugStream = new PrintStream(new FileOutputStream(debugFile, true), true);
-		} else
-			this.debugStream = System.out;
-
+		defineDebug(debug);
 
 		fromDirectory(new File(file));
 	}
@@ -116,10 +112,7 @@ public class Connector implements AutoCloseable {
 		if (file == null)
 			throw new NullPointerException("File is null");
 
-		if (debug)
-			this.debugStream = new PrintStream(new FileOutputStream(File.createTempFile("sublandroid", "lob"), true), true);
-		else
-			this.debugStream = System.out;
+		defineDebug(debug);
 
 		fromDirectory(file);
 	}
@@ -136,6 +129,20 @@ public class Connector implements AutoCloseable {
 		IOUtils.close(writer);
 
 		println("Closed");
+	}
+
+	private void defineDebug(boolean debug) {
+		if (debug) {
+			try {
+				File outFile = new File(System.getProperty("java.io.tmpdir"), "sublandroid.out.log");
+				File errFile = new File(System.getProperty("java.io.tmpdir"), "sublandroid.err.log");
+
+				System.setOut(new PrintStream(new FileOutputStream(outFile, true)));
+				System.setErr(new PrintStream(new FileOutputStream(errFile, true)));
+			} catch (FileNotFoundException ex) {
+
+			}
+		}
 	}
 
 	private void execute(final Command command, final MCommand mCommand) {
@@ -204,10 +211,6 @@ public class Connector implements AutoCloseable {
 				throw throwable;
 			}
 		}
-	}
-
-	protected void println(String msg, Object... args) {
-		this.debugStream.println(format(msg, args));
 	}
 
 	private void run(final String line) throws IOException {
