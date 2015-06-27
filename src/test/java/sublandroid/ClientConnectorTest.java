@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.*;
 
 public class ClientConnectorTest {
 
-	@Test(timeOut=5000)
+	@Test(timeOut=10000)
 	public void helloCommand() throws Throwable {
 		try (ClientContext context = new ClientContext(PROJECT_01, 12345)) {
 

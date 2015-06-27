@@ -54,7 +54,7 @@ public abstract class Util {
 			writer = new BufferedWriter(outputWriter);
 			reader = new BufferedReader(inputReader);
 
-			connector = new Connector(join(path));
+			connector = new Connector(join(path), true);
 		}
 
 		private Runner runner = null;
@@ -85,7 +85,7 @@ public abstract class Util {
 		public final BufferedReader reader;
 
 		public ClientContext(String path, int port) throws Throwable {
-			connector = new Connector(path);
+			connector = new Connector(path, true);
 			this.port = port;
 
 			connector.listen(port);
