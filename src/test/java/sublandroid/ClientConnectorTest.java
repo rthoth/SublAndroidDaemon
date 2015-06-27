@@ -27,4 +27,15 @@ public class ClientConnectorTest {
 		}
 	}
 
+
+	@Test(timeOut=5000, expectedExceptions=CommandFailed.class)
+	public void unknowCommand() throws Throwable {
+		try(ClientContext context = new ClientContext(PROJECT_01, 12346)) {
+
+			send(MCommand.from("unknowCommand"), context.writer);
+
+			read(context.reader, Object.class);
+		}
+	}
+
 }

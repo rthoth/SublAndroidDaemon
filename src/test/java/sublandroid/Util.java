@@ -17,6 +17,19 @@ public abstract class Util {
 
 	};
 
+	public static class CommandFailed extends RuntimeException {
+
+		public Object object;
+
+		public CommandFailed(Object object) {
+			super(object.toString());
+			this.object = object;
+		}
+
+		public <T> T get() {
+			return (T) object;
+		}
+	}
 
 	public static class Context implements AutoCloseable {
 
@@ -127,13 +140,35 @@ public abstract class Util {
 	}
 
 	public static <T> T read(BufferedReader reader, Class<T> clazz) throws IOException {
-		return parseObject(reader.readLine(), clazz);
+		final char status = (char) reader.read();
+		final T object = parseObject(reader.readLine(), clazz);
+
+		switch(status) {
+			case 'S':
+				return object;
+
+			case 'E':
+				throw new CommandFailed(object);
+
+			default:
+				throw new IllegalStateException(String.valueOf(status));
+		}
 	}
 
 	public static <T> T read(BufferedReader reader, TypeReference<T> type) throws IOException {
-		final String line = reader.readLine();
-		System.err.println(line);
-		return parseObject(line, type);
+		final char status = (char) reader.read();
+		final T object = parseObject(reader.readLine(), type);
+
+		switch(status) {
+			case 'S':
+				return object;
+
+			case 'E':
+				throw new CommandFailed(object);
+
+			default:
+				throw new IllegalStateException(String.valueOf(status));
+		}
 	}
 
 }

@@ -8,9 +8,9 @@ import java.io.*;
 import java.net.*;
 
 import org.gradle.tooling.*;
+
 import static com.alibaba.fastjson.JSON.parseObject;
 import static com.alibaba.fastjson.JSON.writeJSONStringTo;
-import static com.alibaba.fastjson.serializer.SerializerFeature.*;
 
 
 
@@ -140,21 +140,18 @@ public class Connector implements AutoCloseable {
 
 	private void execute(final Command command, final MCommand mCommand) {
 		Message message = null;
+		boolean success = true;
+
 		try {
 			println("Trying %s", mCommand.command);
 			message = command.execute(mCommand, projectConnection);
 			println("Executed %s", mCommand.command);
 		} catch (Throwable throwable) {
+			success = false;
 			message = new MFailure(throwable);
 		}
 
-		try {
-			writeJSONStringTo(message, writer);
-			writer.write('\n');
-			writer.flush();
-		} catch (Throwable throwable) {
-			throw new Error(throwable);
-		}
+		response(success, message);
 	}
 
 	private void fromDirectory(File directory) throws IOException {
@@ -165,6 +162,22 @@ public class Connector implements AutoCloseable {
 			projectConnection = GradleConnector.newConnector().forProjectDirectory(directory).connect();
 		} catch (RuntimeException exception) {
 			println(format("Trying start gradle at %s", directory.getCanonicalPath()));
+		}
+	}
+
+	public void response(boolean success, Message message) {
+		try {
+
+			if (success)
+				writer.write('S');
+			else
+				writer.write('E');
+
+			writeJSONStringTo(message, writer);
+			writer.write('\n');
+			writer.flush();
+		} catch (Throwable throwable) {
+			throw new Error(throwable);
 		}
 	}
 
@@ -188,7 +201,7 @@ public class Connector implements AutoCloseable {
 			try {
 				run(this.reader.readLine());
 			} catch (Throwable throwable) {
-
+				throw throwable;
 			}
 		}
 	}
@@ -213,6 +226,9 @@ public class Connector implements AutoCloseable {
 
 		if (command != null)
 			execute(command, mCommand);
+		else
+			response(false, new MFailure(format("Command %s not found", mCommand.command), "CommandNotFoundException"));
+
 	}
 
 }

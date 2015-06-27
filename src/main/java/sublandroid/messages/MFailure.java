@@ -3,7 +3,7 @@ package sublandroid.messages;
 public class MFailure extends Message {
 	public String message;
 	public String type;
-	public MFailure cause;
+	public MFailure cause = null;
 
 	public MFailure() {
 
@@ -15,5 +15,10 @@ public class MFailure extends Message {
 
 		if (throwable.getCause() != null)
 			cause = new MFailure(throwable.getCause());
+	}
+
+	public MFailure(String message, String type) {
+		this.message = message;
+		this.type = type;
 	}
 }
