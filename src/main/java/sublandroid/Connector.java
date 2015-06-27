@@ -63,9 +63,6 @@ public class Connector implements AutoCloseable {
 		System.out.println(format(msg, args));
 	}
 
-	protected final String DEBUG_PREFIX = "sublandroid_";
-	protected final String DEBUG_SUFIX = ".log";
-
 	public static void main(String args[]) {
 		if (args.length == 0)
 			throw new IllegalArgumentException("Need a gradle project folder");
