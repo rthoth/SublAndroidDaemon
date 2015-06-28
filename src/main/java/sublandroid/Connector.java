@@ -86,6 +86,7 @@ public class Connector implements AutoCloseable {
 	}
 
 	protected ProjectConnection projectConnection = null;
+	protected Commands commands = new Commands();
 
 	private BufferedReader reader = null;
 	private Server server = null;
@@ -151,6 +152,7 @@ public class Connector implements AutoCloseable {
 			message = command.execute(mCommand, projectConnection);
 			println("Executed %s", mCommand.command);
 		} catch (Throwable throwable) {
+			println("Failed %s", mCommand.command);
 			success = false;
 			message = new MFailure(throwable);
 		}
@@ -214,20 +216,14 @@ public class Connector implements AutoCloseable {
 		final MCommand mCommand = parseObject(line, MCommand.class);
 		println("Searching %s", mCommand.command);
 
-		Command command = null;
-		switch(mCommand.command) {
-			case Hello.COMMAND:
-				command = new Hello();
-				break;
-			case ShowTasks.COMMAND:
-				command = new ShowTasks();
-				break;
-		}
+		Command command = commands.search(mCommand);
 
 		if (command != null)
 			execute(command, mCommand);
-		else
+		else {
+			println("Not found %s", mCommand.command);
 			response(false, new MFailure(format("Command %s not found", mCommand.command), "CommandNotFoundException"));
+		}
 
 	}
 

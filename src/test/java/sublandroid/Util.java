@@ -54,7 +54,7 @@ public abstract class Util {
 			writer = new BufferedWriter(outputWriter);
 			reader = new BufferedReader(inputReader);
 
-			connector = new Connector(join(path), true);
+			connector = new Connector(join(path));
 		}
 
 		private Runner runner = null;
@@ -85,7 +85,7 @@ public abstract class Util {
 		public final BufferedReader reader;
 
 		public ClientContext(String path, int port) throws Throwable {
-			connector = new Connector(path, true);
+			connector = new Connector(path);
 			this.port = port;
 
 			connector.listen(port);
@@ -141,14 +141,13 @@ public abstract class Util {
 
 	public static <T> T read(BufferedReader reader, Class<T> clazz) throws IOException {
 		final char status = (char) reader.read();
-		final T object = parseObject(reader.readLine(), clazz);
 
 		switch(status) {
 			case 'S':
-				return object;
+				return parseObject(reader.readLine(), clazz);
 
 			case 'E':
-				throw new CommandFailed(object);
+				throw new CommandFailed(parseObject(reader.readLine(), MFailure.class));
 
 			default:
 				throw new IllegalStateException(String.valueOf(status));
