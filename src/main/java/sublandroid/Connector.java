@@ -153,6 +153,8 @@ public class Connector implements AutoCloseable {
 			println("Executed %s", mCommand.command);
 		} catch (Throwable throwable) {
 			println("Failed %s", mCommand.command);
+			throwable.printStackTrace();
+			
 			success = false;
 			message = new MFailure(throwable);
 		}

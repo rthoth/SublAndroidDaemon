@@ -14,16 +14,17 @@ public class CompileJava extends Command {
 
 	@Override
 	public Message execute(MCommand mCommand, ProjectConnection connection)	{
-		final Tuple3<BuildLauncher, ByteArrayOutputStream, ByteArrayOutputStream> tuple = buildLauncher(connection);
+		final Context context = Context.from(connection);
 
-		tuple.t1.forTasks("compileDebugJava");
+		context.buildLauncher.forTasks("compileDebugJava");
 
 		final MJavaCompile message = new MJavaCompile();
 
 		try {
-			tuple.t1.run();
+			context.buildLauncher.run();
 		} catch (BuildException buildEx) {
-			Matcher matcher = JAVA_ERROR_PATTERN.matcher(new String(tuple.t3.toByteArray()));
+
+			Matcher matcher = JAVA_ERROR_PATTERN.matcher(new String(context.error.toByteArray()));
 
 			while (matcher.find()) {
 				final String fileName = matcher.group(1);
@@ -34,6 +35,9 @@ public class CompileJava extends Command {
 
 				message.addJavaFailure(fileName, lineNumber, kind, what, how);
 			}
+
+			if (message.failures == null)
+				throw buildEx;
 		}
 
 		return message;

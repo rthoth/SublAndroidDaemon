@@ -1,8 +1,8 @@
 package sublandroid.messages;
 
 public class MFailure extends Message {
-	public String message;
-	public String type;
+	public String message = null;
+	public String type = null;
 	public MFailure cause = null;
 
 	public MFailure() {

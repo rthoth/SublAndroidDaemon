@@ -22,6 +22,7 @@ public class CompileJavaTest {
 			MJavaCompile result = read(context.reader, MJavaCompile.class);
 
 			assertThat(result).isNotNull();
+			assertThat(result.failures).isNotNull();
 			assertThat(result.failures).hasSize(1);
 
 			JavaSourceFailure failure1 = result.failures.get(0);
