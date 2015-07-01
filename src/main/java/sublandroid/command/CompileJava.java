@@ -10,7 +10,9 @@ public class CompileJava extends Command {
 
 	public static final String COMMAND = "compileJava";
 
-	protected static final Pattern JAVA_ERROR_PATTERN = Pattern.compile("^([^:]*):(\\d+):\\s*([^:]+):\\s+(.*)$\\s+(.*)$", Pattern.MULTILINE);
+	protected static final String NL_PATTERN = "[\r\n]+";
+	protected static final Pattern JAVA_ERROR_PATTERN = Pattern.compile("^([^:]*):(\\d+):\\s*([^:]+):\\s*(.*)$");
+
 
 	@Override
 	public Message execute(MCommand mCommand, ProjectConnection connection)	{
@@ -24,17 +26,24 @@ public class CompileJava extends Command {
 			context.buildLauncher.run();
 		} catch (BuildException buildEx) {
 
-			Matcher matcher = JAVA_ERROR_PATTERN.matcher(new String(context.error.toByteArray()));
+			final String errOut = new String(context.error.toByteArray());
 
-			while (matcher.find()) {
-				final String fileName = matcher.group(1);
-				final int lineNumber = Integer.parseInt(matcher.group(2));
-				final String kind = matcher.group(3);
-				final String what = matcher.group(4);
-				final String how = matcher.group(5);
+			final String[] lines = errOut.split(NL_PATTERN);
 
-				message.addJavaFailure(fileName, lineNumber, kind, what, how);
+			for (int i=0; i<lines.length; i++) {
+				final Matcher matcher = JAVA_ERROR_PATTERN.matcher(lines[i]);
+
+				if (matcher.matches()) {
+					final String fileName = matcher.group(1);
+					final int lineNumber = Integer.parseInt(matcher.group(2));
+					final String kind = matcher.group(3);
+					final String what = matcher.group(4);
+					final String how = lines[++i];
+					i++;
+					message.addJavaFailure(fileName, lineNumber, kind, what, how);
+				}
 			}
+
 
 			if (message.failures == null)
 				throw buildEx;
