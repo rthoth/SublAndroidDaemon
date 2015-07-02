@@ -140,14 +140,16 @@ public abstract class Util {
 	}
 
 	public static <T> T read(BufferedReader reader, Class<T> clazz) throws IOException {
-		final char status = (char) reader.read();
+		final String line = reader.readLine();
+		System.err.println(line);
+		final char status = line.charAt(0);
 
 		switch(status) {
 			case 'S':
-				return parseObject(reader.readLine(), clazz);
+				return parseObject(line.substring(1), clazz);
 
 			case 'E':
-				throw new CommandFailed(parseObject(reader.readLine(), MFailure.class));
+				throw new CommandFailed(parseObject(line.substring(1), MFailure.class));
 
 			default:
 				throw new IllegalStateException(String.valueOf(status));
@@ -155,8 +157,11 @@ public abstract class Util {
 	}
 
 	public static <T> T read(BufferedReader reader, TypeReference<T> type) throws IOException {
-		final char status = (char) reader.read();
-		final T object = parseObject(reader.readLine(), type);
+		final String line = reader.readLine();
+		System.err.println(line);
+		
+		final char status = line.charAt(0);
+		final T object = parseObject(line.substring(1), type);
 
 		switch(status) {
 			case 'S':
