@@ -9,17 +9,11 @@ public class Main extends Activity
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
-
+        super.onCreate(savedInstanceState,);
         setContentView(R.layout.main);
 
-        java.util.Date date = new java.util.Date();
+        for (;;) {
 
-				Runnable runnable = new Runnable() {
-					public void run() {
-						println(date);
-					}
-				};
-
+        }
     }
 }
