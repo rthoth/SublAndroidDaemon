@@ -20,7 +20,7 @@ public abstract class Command {
 			final Context context = new Context();
 
 			final BuildLauncher buildLauncher = connection.newBuild();
-			context.buildLauncher= buildLauncher;
+			context.buildLauncher = buildLauncher;
 			buildLauncher.setStandardError(context.error);
 			buildLauncher.setStandardOutput(context.output);
 			buildLauncher.setStandardInput(context.input);
