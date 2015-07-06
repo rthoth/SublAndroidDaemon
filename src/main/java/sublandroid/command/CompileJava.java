@@ -11,12 +11,13 @@ public class CompileJava extends Command {
 
 	public static final String COMMAND = "compileJava";
 
-
-	protected static final Pattern ERROR_PATTERN = Pattern.compile("^([^:]+):(\\d+):\\s+([^:]+):\\s+(.+)$");
-
 	protected static final String CANNOT_FIND_SYMBOL = "cannot find symbol";
 
 	protected static final Pattern DETAIL_PATTERN = Pattern.compile("^\\W*([^:]+):\\s+(.+)$");
+
+	protected static final Pattern ERROR_PATTERN = Pattern.compile("^([^:]+):(\\d+):\\s+([^:]+):\\s+(.+)$");
+
+	protected static final String GRADLE_TASK = "compileDebugJava";
 
 	protected static final String LINE_BREAK = "[\\r\\n]+";
 	
@@ -27,7 +28,7 @@ public class CompileJava extends Command {
 	public Message execute(MCommand mCommand, ProjectConnection connection)	{
 		final Context context = Context.from(connection);
 
-		context.buildLauncher.forTasks("compileDebugJava");
+		context.buildLauncher.forTasks(GRADLE_TASK);
 
 		final MJavaCompile message = new MJavaCompile();
 

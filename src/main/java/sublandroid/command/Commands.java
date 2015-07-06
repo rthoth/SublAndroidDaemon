@@ -14,6 +14,9 @@ public class Commands {
 
 			case CompileJava.COMMAND:
 				return new CompileJava();
+
+			case CompileResource.COMMAND:
+				return new CompileResource();
 		}
 
 		return null;
