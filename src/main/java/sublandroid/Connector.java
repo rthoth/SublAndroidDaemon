@@ -44,14 +44,27 @@ public class Connector implements AutoCloseable {
 		public void run() {
 			try {
 				serverSocket = new ServerSocket(port, 1, InetAddress.getLoopbackAddress());
-				while (true) {
+				boolean loop = true;
+				while (loop) {
 					connector.println("SublAndroid listen @ %d", serverSocket.getLocalPort());
 					clientSocket = serverSocket.accept();
 					connector.println("A new sublandroid developer!");
 
 					clientReader = new InputStreamReader(clientSocket.getInputStream());
 					clientWriter = new OutputStreamWriter(clientSocket.getOutputStream());
-					connector.listen(clientReader, clientWriter);
+					try {
+						connector.listen(clientReader, clientWriter);
+						
+					} catch (SocketException socketException) {
+						if (serverSocket.isClosed()) {
+							connector.println("Exiting...");
+							loop = false;
+						} else {
+							IOUtils.close(clientSocket);
+							IOUtils.close(clientWriter);
+							IOUtils.close(clientReader);
+						}
+					}
 				}
 			} catch (Throwable throwable) {
 				throwable.printStackTrace();
@@ -151,6 +164,7 @@ public class Connector implements AutoCloseable {
 			println("Trying %s", mCommand.command);
 			message = command.execute(mCommand, projectConnection);
 			println("Executed %s", mCommand.command);
+
 		} catch (Throwable throwable) {
 			println("Failed %s", mCommand.command);
 			throwable.printStackTrace();
@@ -206,16 +220,21 @@ public class Connector implements AutoCloseable {
 		this.writer = (writer instanceof BufferedWriter) ? (BufferedWriter) writer : new BufferedWriter(writer);
 
 		while(true) {
-			try {
-				run(this.reader.readLine());
-			} catch (Throwable throwable) {
-				throw throwable;
-			}
+			run(this.reader.readLine());
 		}
 	}
 
 	private void run(final String line) throws IOException {
-		final MCommand mCommand = parseObject(line, MCommand.class);
+		MCommand mCommand = null;
+
+		try {
+			mCommand = parseObject(line, MCommand.class);
+
+		} catch (Exception exception) {
+			println("Invalid input: %s", line);
+			return;
+		}
+
 		println("Searching %s", mCommand.command);
 
 		Command command = commands.search(mCommand);
