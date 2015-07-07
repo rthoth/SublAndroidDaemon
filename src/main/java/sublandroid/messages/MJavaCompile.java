@@ -11,25 +11,14 @@ public class MJavaCompile extends Message {
 
 	}
 
-	public MJavaCompile addJavaFailure(
-		String fileName, int lineNumber, String kind,
-		String what, String where) {
+	public MJavaCompile addJavaFailure(MHighlight highlight) {
 
-		return addJavaFailure(fileName, lineNumber, kind, what, where, null);
-	}
+		if (highlight != null) {
+			if (failures == null)
+				failures = new LinkedList<>();
 
-	public MJavaCompile addJavaFailure(
-		String fileName, int lineNumber, String kind,
-		String what, String where, String description) {
-
-		final MHighlight failure = new MHighlight(
-			fileName, lineNumber, kind, what, where, description
-		);
-
-		if (failures == null)
-			failures = new LinkedList<>();
-
-		failures.add(failure);
+			failures.add(highlight);
+		}
 
 		return this;
 	}
