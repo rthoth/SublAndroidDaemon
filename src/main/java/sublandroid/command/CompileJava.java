@@ -28,12 +28,12 @@ public class CompileJava extends Command {
 	public Message execute(MCommand mCommand, ProjectConnection connection)	{
 		final Context context = Context.from(connection);
 
-		context.buildLauncher.forTasks(GRADLE_TASK);
+		context.tasks(GRADLE_TASK);
 
 		final MJavaCompile message = new MJavaCompile();
 
 		try {
-			context.buildLauncher.run();
+			context.run();
 		} catch (BuildException buildEx) {
 
 			final String errOut = new String(context.error.toByteArray());

@@ -10,22 +10,30 @@ public abstract class Command {
 
 	protected static class Context {
 
+		public static Context from(ProjectConnection connection) {
+			return new Context(connection);
+		}
+
 		public BuildLauncher buildLauncher;
 		public ByteArrayOutputStream output = new ByteArrayOutputStream();
 		public ByteArrayOutputStream error = new ByteArrayOutputStream();
 		public ByteArrayInputStream input = new ByteArrayInputStream(new byte[0]);
 
+		public Context(final ProjectConnection connection) {
+			buildLauncher = connection.newBuild();
+			buildLauncher.setStandardError(error);
+			buildLauncher.setStandardOutput(output);
+			buildLauncher.setStandardInput(input);
+		}
 
-		public static Context from(ProjectConnection connection) {
-			final Context context = new Context();
+		public Context run() {
+			buildLauncher.run();
+			return this;
+		}
 
-			final BuildLauncher buildLauncher = connection.newBuild();
-			context.buildLauncher = buildLauncher;
-			buildLauncher.setStandardError(context.error);
-			buildLauncher.setStandardOutput(context.output);
-			buildLauncher.setStandardInput(context.input);
-
-			return context;
+		public Context tasks(String... tasks) {
+			buildLauncher.forTasks(tasks);
+			return this;
 		}
 
 	}

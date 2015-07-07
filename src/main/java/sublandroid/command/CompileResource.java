@@ -15,9 +15,9 @@ public class CompileResource extends Command {
 	public Message execute(MCommand mCommand, ProjectConnection connection) {
 		Context context = Context.from(connection);
 
-		context.buildLauncher.forTasks("generateDebugSources");
+		context.tasks("generateDebugSources");
 
-		context.buildLauncher.run();
+		context.run();
 
 		return new MResourceCompile();
 	}
