@@ -27,7 +27,13 @@ public abstract class Command {
 		}
 
 		public Context run() {
-			buildLauncher.run();
+			try {
+				buildLauncher.run();
+			} catch (BuildException buildException) {
+				System.err.println(String.format("Build Erro:\n%s", new String(error.toByteArray())));
+				buildException.printStackTrace();
+				throw buildException;
+			}
 			return this;
 		}
 

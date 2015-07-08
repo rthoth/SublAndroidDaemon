@@ -19,7 +19,7 @@ public class CompileJava extends Command {
 
 	protected static final String GRADLE_TASK = "compileDebugJava";
 
-	protected static final String LINE_BREAK = "[\\r\\n]+";
+	protected static final Pattern LINE_BREAK_PATTERN = Pattern.compile("[\\r\\n]+");
 	
 	protected static final Pattern SEMANTIC_ERROR = Pattern.compile("^[^\\s]+\\s[^\\s]+\\sin\\sclass");
 
@@ -89,7 +89,7 @@ public class CompileJava extends Command {
 	protected void processJavaErrors(final MJavaCompile message, final Context ctx) {
 		final String errOut = new String(ctx.error.toByteArray());
 
-		final String[] lines = errOut.split(LINE_BREAK);
+		final String[] lines = LINE_BREAK_PATTERN.split(errOut);
 
 		for (int i=0; i<lines.length; i++) {
 			final Matcher matcher = ERROR_PATTERN.matcher(lines[i]);
@@ -104,14 +104,11 @@ public class CompileJava extends Command {
 
 				MHighlight highlight = new MHighlight(fileName, lineNumber, kind, what, where);
 
-
-
 				if (CANNOT_FIND_SYMBOL.equals(what))
 					i += cannotFindSymbol(highlight, i, lines);
 				
 				else if (SEMANTIC_ERROR.matcher(what).find())
 					i += semanticError(highlight, i, lines);
-					
 
 				message.addJavaFailure(highlight);
 			}

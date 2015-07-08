@@ -9,7 +9,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAINE" />
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            </intent-filterr>
         </activity>
     </application>
 </manifest>
