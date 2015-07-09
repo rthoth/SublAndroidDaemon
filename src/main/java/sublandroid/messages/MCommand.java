@@ -4,6 +4,7 @@ import java.util.*;
 
 public class MCommand {
 	public String command = null;
+	public transient String projectPath = null;
 	public Map<String, Object> arguments = null;
 
 	public MCommand() {

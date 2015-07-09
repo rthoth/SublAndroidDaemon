@@ -1,10 +1,13 @@
 package sublandroid.command;
 
 import java.io.*;
+import java.nio.file.*;
+import java.util.regex.*;
 
 import sublandroid.messages.*;
 
 import org.gradle.tooling.*;
+import org.gradle.tooling.model.*;
 import org.gradle.api.tasks.*;
 
 
@@ -12,43 +15,68 @@ public class CompileResource extends Command {
 
 	public static final String COMMAND = "compileResource";
 
+	protected static final String GENERATE_DEBUG_SRCS = "generateDebugSources";
+
 	protected static final String PREPARE_DEBUG_DEPS = "prepareDebugDependencies";
+
+	protected static final String WHAT_TASK_FAILED_PATTERN = "Execution\\sfailed\\sfor\\stask\\s'([^']+)'\\.";
+	protected static final Pattern WHAT_TASK_FAILED = Pattern.compile(WHAT_TASK_FAILED_PATTERN);
+
+	protected static final String MANIFEST_ERROR_PATTERN = "[^;]+; lineNumber: (\\d+); columnNumber: \\d+; (.+)";
+	protected static final Pattern MANIFEST_ERROR = Pattern.compile(MANIFEST_ERROR_PATTERN);
+	
+	protected String projectPath = null;
+	protected MResourceCompile resourceCompile = new MResourceCompile();
+	protected Context ctx = null;
 
 	@Override
 	public Message execute(MCommand mCommand, ProjectConnection connection) {
-		Context context = Context.from(connection);
-
-		context.tasks("generateDebugSources");
-
-		MResourceCompile resourceCompile = new MResourceCompile();
+		ctx = Context.from(connection);
+		projectPath = mCommand.projectPath;
+		ctx.tasks(GENERATE_DEBUG_SRCS);
 
 		try {
-			context.run();
+			ctx.run();
+
 		} catch (BuildException buildException) {
-			processErrors(resourceCompile, context, buildException);
+			searchFailures();
 		}
 
-		return null;
+		return resourceCompile;
 	}
 
-	protected void processErrors(MResourceCompile resourceCompile, Context ctx, BuildException buildException) {
-		Throwable cause = buildException.getCause();
-		while (cause != null) {
-			System.out.println(cause.getClass().getName());
-			/*if (cause instanceof RuntimeException) {
-				RuntimeException taskException = (RuntimeException) cause;
+	protected void manifestError(String cause) {
+		final Matcher manifestError = MANIFEST_ERROR.matcher(cause);
+		if (manifestError.matches()) {
 
-				if (PREPARE_DEBUG_DEPS.equals(taskException.getName())) {
-					processManifestError(resourceCompile, ctx, taskException);
+			Path filePath = FileSystems.getDefault().getPath(projectPath, "src", "main", "AndroidManifest.xml");
+			int lineNumber = Integer.parseInt(manifestError.group(1));
+			String what = manifestError.group(2);
+
+			resourceCompile.addFailure(new MHighlight(filePath.toString(), lineNumber, "error", what, null));
+		} else {
+			throw new IllegalArgumentException("Invalid manifest error line: " + cause);
+		}
+	}
+
+	protected void searchFailures() {
+		String[] lines = LINE_BREAK_PATTERN.split(new String(ctx.error.toByteArray()));
+
+		for (int i=0; i<lines.length; i++) {
+			final Matcher whatTaskMatcher = WHAT_TASK_FAILED.matcher(lines[i]);
+
+			if (whatTaskMatcher.matches()) {
+				final String failedTask = whatTaskMatcher.group(1);
+
+				if (failedTask.endsWith(PREPARE_DEBUG_DEPS)) {
+					manifestError(lines[++i]);
+					return;
 				}
-			}*/
-
-			cause = cause.getCause();
+			}
 		}
-	}
 
-	protected void processManifestError(MResourceCompile resourceCompile, Context ctx, RuntimeException taskException) {
 
+		throw new IllegalStateException("No errors!");
 	}
 
 }

@@ -19,8 +19,6 @@ public class CompileJava extends Command {
 
 	protected static final String GRADLE_TASK = "compileDebugJava";
 
-	protected static final Pattern LINE_BREAK_PATTERN = Pattern.compile("[\\r\\n]+");
-	
 	protected static final Pattern SEMANTIC_ERROR = Pattern.compile("^[^\\s]+\\s[^\\s]+\\sin\\sclass");
 
 

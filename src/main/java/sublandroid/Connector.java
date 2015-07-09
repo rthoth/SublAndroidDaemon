@@ -99,6 +99,7 @@ public class Connector implements AutoCloseable {
 	}
 
 	protected ProjectConnection projectConnection = null;
+	protected String projectPath = null;
 	protected Commands commands = new Commands();
 
 	private BufferedReader reader = null;
@@ -185,6 +186,8 @@ public class Connector implements AutoCloseable {
 		} catch (RuntimeException exception) {
 			println(format("Trying start gradle at %s", directory.getCanonicalPath()));
 		}
+
+		this.projectPath = directory.getCanonicalPath();
 	}
 
 	public void response(boolean success, Message message) {
@@ -234,6 +237,8 @@ public class Connector implements AutoCloseable {
 			println("Invalid input: %s", line);
 			return;
 		}
+
+		mCommand.projectPath = projectPath;
 
 		println("Searching %s", mCommand.command);
 

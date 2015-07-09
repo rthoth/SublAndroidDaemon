@@ -1,6 +1,7 @@
 package sublandroid.command;
 
 import java.io.*;
+import java.util.regex.*;
 
 import sublandroid.messages.*;
 
@@ -27,13 +28,7 @@ public abstract class Command {
 		}
 
 		public Context run() {
-			try {
-				buildLauncher.run();
-			} catch (BuildException buildException) {
-				System.err.println(String.format("Build Erro:\n%s", new String(error.toByteArray())));
-				buildException.printStackTrace();
-				throw buildException;
-			}
+			buildLauncher.run();
 			return this;
 		}
 
@@ -43,6 +38,8 @@ public abstract class Command {
 		}
 
 	}
+
+	protected static final Pattern LINE_BREAK_PATTERN = Pattern.compile("[\\r\\n]+");
 	
 	public abstract Message execute(MCommand mCommand, ProjectConnection connection);
 
