@@ -4,12 +4,13 @@ sourceCompatibility = '1.7'
 
 group = 'org.sublandroid'
 
-version = '0.0.1'
+version = '1.0.0'
 
 mainClassName = 'sublandroid.Connector'
 applicationName = 'sublandroid'
 	
 allprojects {
+
 	repositories {
 		mavenCentral()
 
@@ -28,23 +29,7 @@ allprojects {
 dependencies {
 	compile 'org.gradle:gradle-tooling-api:2.4'
 	compile 'com.alibaba:fastjson:1.2.6'
-	
-	compile project(':core')
-	compile project(':plugin')
 
 	testCompile 'org.testng:testng:6.9.4'
 	testCompile 'org.assertj:assertj-core:2.1.0'
-}
-
-project(':plugin') {
-	dependencies {
-		compile gradleApi()
-		compile 'org.gradle:gradle-tooling-api:2.4'
-	}
-
-	jar {
-		archiveName 'plugin.jar'
-	}
-
-	test.dependsOn(jar)
 }

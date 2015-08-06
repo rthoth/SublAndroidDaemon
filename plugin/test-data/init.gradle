@@ -1,9 +1,0 @@
-initscript {
-	dependencies {
-		classpath files('../build/libs/plugin.jar')
-	}
-}
-
-allprojects {
-	apply plugin: sublandroid.plugin.SublAndroidPlugin
-}
