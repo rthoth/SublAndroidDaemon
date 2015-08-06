@@ -126,8 +126,6 @@ public class Daemon implements AutoCloseable {
 		if (!directory.isDirectory())
 			throw new IOException(format("%s must be a directory", directory.getCanonicalPath()));
 
-		
-
 		try {
 			projectConnection = GradleConnector.newConnector().forProjectDirectory(directory).connect();
 		} catch (RuntimeException exception) {
