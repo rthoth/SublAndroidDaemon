@@ -8,7 +8,6 @@ public class MCommand {
 	public Map<String, Object> arguments = null;
 
 	public MCommand() {
-
 	}
 
 	public MCommand(String command) {

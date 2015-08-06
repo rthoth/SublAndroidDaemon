@@ -1,7 +1,7 @@
 package sublandroid;
 
+import sublandroid.daemon.*;
 import sublandroid.messages.*;
-import static sublandroid.Path.*;
 
 import java.io.*;
 import java.net.*;
@@ -10,6 +10,7 @@ import com.alibaba.fastjson.TypeReference;
 
 import static com.alibaba.fastjson.JSON.writeJSONStringTo;
 import static com.alibaba.fastjson.JSON.parseObject;
+import static sublandroid.Path.*;
 
 public abstract class Util {
 
@@ -42,7 +43,7 @@ public abstract class Util {
 		public final BufferedWriter writer;
 		public final BufferedReader reader;
 
-		public final Connector connector;
+		public final Daemon daemon;
 
 		public Context(String path) throws IOException {
 			outputWriter = new PipedWriter();
@@ -54,7 +55,7 @@ public abstract class Util {
 			writer = new BufferedWriter(outputWriter);
 			reader = new BufferedReader(inputReader);
 
-			connector = new Connector(join(path));
+			daemon = new Daemon(join(path));
 		}
 
 		private Runner runner = null;
@@ -62,7 +63,7 @@ public abstract class Util {
 		public Runner run() {
 			synchronized (this) {
 				if (runner == null)
-					runner = new Runner(connector, outputReader, inputWriter);
+					runner = new Runner(daemon, outputReader, inputWriter);
 			}
 
 			return runner;
@@ -70,7 +71,7 @@ public abstract class Util {
 
 		@Override
 		public void close() {
-			IOUtils.close(connector);
+			IOUtils.close(daemon);
 			IOUtils.close(reader);
 			IOUtils.close(writer);
 		}
@@ -78,17 +79,17 @@ public abstract class Util {
 
 	public static class ClientContext implements AutoCloseable {
 
-		public final Connector connector;
+		public final Daemon daemon;
 		public final int port;
 		public final Socket socket;
 		public final BufferedWriter writer;
 		public final BufferedReader reader;
 
 		public ClientContext(String path, int port) throws Throwable {
-			connector = new Connector(path);
+			daemon = new Daemon(path);
 			this.port = port;
 
-			connector.listen(port);
+			daemon.listen(port);
 
 			Thread.sleep(500);
 
@@ -100,7 +101,7 @@ public abstract class Util {
 
 		@Override
 		public void close() {
-			connector.close();
+			daemon.close();
 			IOUtils.close(writer);
 			IOUtils.close(reader);
 			IOUtils.close(socket);
@@ -110,23 +111,23 @@ public abstract class Util {
 
 	public static class Runner implements Runnable {
 
-		private final Connector connector;
+		private final Daemon daemon;
 		private final Reader reader;
 		private final Writer writer;
 		private final Thread thread;
 
 
-		public Runner(final Connector connector, final Reader reader, final Writer writer) {
+		public Runner(final Daemon daemon, final Reader reader, final Writer writer) {
 			this.reader = reader;
 			this.writer = writer;
-			this.connector = connector;
+			this.daemon = daemon;
 			this.thread = new Thread(this);
 			this.thread.start();
 		}
 
 		public void run() {
 			try {
-				this.connector.listen(reader, writer);
+				this.daemon.talk(reader, writer);
 			} catch (Throwable throwable) {
 				throwable.printStackTrace();
 			}
