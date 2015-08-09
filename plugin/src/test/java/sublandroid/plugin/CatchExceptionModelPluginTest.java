@@ -9,6 +9,7 @@ import org.gradle.tooling.*;
 import org.testng.annotations.*;
 
 import static sublandroid.plugin.TestHelpers.*;
+import static org.assertj.core.api.Assertions.*;
 
 public class CatchExceptionModelPluginTest {
 
@@ -22,6 +23,9 @@ public class CatchExceptionModelPluginTest {
 		t3 = ctx.model(CatchExceptionModel.class, "check");
 
 		CatchExceptionModel catchException = t3.a.get();
+
+		assertThat(catchException.getStatus().isValidationError()).isTrue();
+		assertThat(catchException.getFailedTaskName()).isEqualTo("processReleaseResources");
 	}
 
 }
