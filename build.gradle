@@ -26,9 +26,37 @@ allprojects {
 	}
 }
 
+project(':core') {
+	jar {
+		archiveName 'sublandroid-core.jar'
+		destinationDir file('../build/libs')
+	}
+}
+
+project(':plugin') {
+	dependencies {
+		compile project(':core')
+		compile gradleApi()
+	}
+
+	jar {
+		destinationDir file('../build/libs')
+		archiveName 'sublandroid-plugin.jar'
+	}
+
+	jar.dependsOn(compileTestJava)
+
+	test.dependsOn(jar)
+}
+
+jar {
+	archiveName 'sublandroid.jar'
+}
+
 dependencies {
 	compile 'org.gradle:gradle-tooling-api:2.4'
 	compile 'com.alibaba:fastjson:1.2.6'
+	compile project(':core')
 
 	testCompile 'org.testng:testng:6.9.4'
 	testCompile 'org.assertj:assertj-core:2.1.0'
