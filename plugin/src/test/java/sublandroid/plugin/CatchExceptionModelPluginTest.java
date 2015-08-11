@@ -20,12 +20,22 @@ public class CatchExceptionModelPluginTest {
 
 		T3<ModelBuilder<CatchExceptionModel>, ByteArrayOutputStream, ByteArrayOutputStream> t3;
 
-		t3 = ctx.model(CatchExceptionModel.class, "check");
+		t3 = ctx.model(CatchExceptionModel.class, "clean", "compileDebugJava");
 
 		CatchExceptionModel catchException = t3.a.get();
 
-		assertThat(catchException.getStatus().isValidationError()).isTrue();
-		assertThat(catchException.getFailedTaskName()).isEqualTo("processReleaseResources");
+		assertThat(catchException.getStatus()).isNotNull();
+		assertThat(catchException.getStatus().status()).isEqualTo("ActionError");
+		assertThat(catchException.getFailedTaskName()).isEqualTo("compileDebugJava");
+
+		Throwable error = catchException.getError();
+		assertThat(error).isNotNull();
+
+		for (Throwable cause = error; cause != null; cause = cause.getCause()) {
+			System.out.println("--------\n" + cause.getMessage() + "\n--------");
+		}
+
+		error.printStackTrace();
 	}
 
 }

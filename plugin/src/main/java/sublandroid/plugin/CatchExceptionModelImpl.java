@@ -11,6 +11,7 @@ import org.gradle.api.invocation.*;
 import org.gradle.api.internal.tasks.ContextAwareTaskAction;
 import org.gradle.api.internal.tasks.TaskExecutionContext;
 import org.gradle.api.internal.tasks.execution.TaskValidator;
+import org.gradle.api.internal.TaskInternal;
 import org.gradle.api.logging.*;
 import org.gradle.api.tasks.*;
 import org.gradle.tooling.provider.model.*;
@@ -21,41 +22,6 @@ CatchExceptionModel, TaskExecutionListener, Serializable, TaskExecutionGraphList
 	private static final Logger ACTION_LOGGER = Logging.getLogger("sublandroid.CatchExceptionModel.NotFailAction");
 	private static final Logger LOGGER = Logging.getLogger("sublandroid.CatchExceptionModel");
 	private static final String MODEL_NAME = CatchExceptionModel.class.getName();
-
-	public enum StatusImpl implements Status {
-		ActionError(true, false, false, false),
-		Ok(false, true, false, false),
-		UnexpectedValidationError(false, false, true, false),
-		ValidationError(false, false, false, true);
-
-		private final boolean actionError;
-		private final boolean ok;
-		private final boolean unexpectedValidationError;
-		private final boolean validationError;
-
-		private StatusImpl(boolean actionError, boolean ok, boolean unexpectedValidationError, boolean validationError) {
-			this.actionError = actionError;
-			this.ok = ok;
-			this.unexpectedValidationError = unexpectedValidationError;
-			this.validationError = validationError;
-		}
-
-		public boolean isActionError() {
-			return actionError;
-		}
-
-		public boolean isOk() {
-			return ok;
-		}
-
-		public boolean isUnexpectedValidationError() {
-			return unexpectedValidationError;
-		}
-
-		public boolean isValidationError() {
-			return validationError;
-		}
-	}
 
 	public class ModelBuilder implements ToolingModelBuilder {
 
@@ -88,7 +54,7 @@ CatchExceptionModel, TaskExecutionListener, Serializable, TaskExecutionGraphList
 		@Override
 		public void execute(final Task task) {
 
-			if (status == StatusImpl.Ok) {
+			if (status == Status.Ok) {
 				try {
 					action.execute(task);
 
@@ -96,7 +62,7 @@ CatchExceptionModel, TaskExecutionListener, Serializable, TaskExecutionGraphList
 					throw stopException;
 
 				} catch (Throwable throwable) {
-					status = StatusImpl.ActionError;
+					status = Status.ActionError;
 					error = throwable;
 					failedTask(task);
 					throw new StopExecutionException();
@@ -125,6 +91,33 @@ CatchExceptionModel, TaskExecutionListener, Serializable, TaskExecutionGraphList
 		}
 	}
 
+	private class NotFailTaskValidator implements TaskValidator {
+
+		private final TaskValidator validator;
+
+		public NotFailTaskValidator(TaskValidator validator) {
+			this.validator = validator;
+		}
+
+		@Override
+		public void validate(TaskInternal task, Collection<String> messages) {
+			if (status == Status.Ok) {
+				List<String> validationMessages = new LinkedList<>();
+				try {
+					this.validator.validate(task, validationMessages);
+				} catch (Throwable throwable) {
+					handleUnexpectedValidationError(task, throwable);
+					return;
+				}
+				
+
+				if (!validationMessages.isEmpty()) {
+					handleValidationErrors(task, validationMessages);
+				}
+			}
+		}
+	}
+
 	private List<String> tasks = new LinkedList<>();
 
 	private Throwable error = null;
@@ -135,9 +128,7 @@ CatchExceptionModel, TaskExecutionListener, Serializable, TaskExecutionGraphList
 
 	private String failedTaskPath = null;
 
-	private Status status = StatusImpl.Ok;
-
-	private transient HashMap<Task, List<TaskValidator>> validatorsMap = new HashMap<>();
+	private Status status = Status.Ok;
 
 	public CatchExceptionModelImpl(final Project project) {
 		Gradle gradle = project.getGradle();
@@ -184,32 +175,7 @@ CatchExceptionModel, TaskExecutionListener, Serializable, TaskExecutionGraphList
 
 	@Override
 	public void beforeExecute(Task task) {
-
-		List<TaskValidator> validators = validatorsMap.get(task);
-
-		if (validators != null && status == StatusImpl.Ok) {
-
-			LOGGER.info("Validating {} ...", task.getPath());
-
-			for (TaskValidator taskValidator : validators) {
-				ArrayList<String> messages = new ArrayList<>();
-
-				try {
-					taskValidator.validate((DefaultTask) task, messages);
-				} catch (Throwable throwable) {
-					LOGGER.info("UnexpectedValidationError", throwable);
-					handleUnexpectedValidationError(task, throwable);
-					break;
-				}
-
-				if (!messages.isEmpty()) {
-					LOGGER.info("ValidationError");
-					handleValidationError(task, messages);
-					break;
-				} else
-					LOGGER.info("Valid!");
-			}
-		}
+		// NOP
 	}
 
 
@@ -221,12 +187,18 @@ CatchExceptionModel, TaskExecutionListener, Serializable, TaskExecutionGraphList
 	public void graphPopulated(final TaskExecutionGraph graph) {
 		for (Task task : graph.getAllTasks()) {
 
-			List<TaskValidator> validators = null;
-
 			if (task instanceof DefaultTask) {
+				
 				final DefaultTask defTask = (DefaultTask) task;
-				validators = new ArrayList<>(defTask.getValidators());
+				List<TaskValidator> oldValidators = new ArrayList<>(defTask.getValidators());
+				List<TaskValidator> newValidators = new ArrayList<>(oldValidators.size());
+
+				for (TaskValidator oldValidator : oldValidators) {
+					newValidators.add(new NotFailTaskValidator(oldValidator));
+				}
+
 				defTask.getValidators().clear();
+				defTask.getValidators().addAll(newValidators);
 			}
 
 			List<Action<? super Task>> oldActions = task.getActions();
@@ -244,23 +216,22 @@ CatchExceptionModel, TaskExecutionListener, Serializable, TaskExecutionGraphList
 			}
 
 			task.setActions(newActions);
-			validatorsMap.put(task, validators);
 			// Remove validators...
 		}
 	}
 
 	protected void handleUnexpectedValidationError(Task task, Throwable throwable) {
-		if (status == StatusImpl.Ok) {
-			status = StatusImpl.UnexpectedValidationError;
+		if (status == Status.Ok) {
+			status = Status.UnexpectedValidationError;
 			failedTask(task);
 		}
 
 		error = throwable;
 	}
 
-	protected void handleValidationError(Task task, List<String> messages) {
-		if (status == StatusImpl.Ok) {
-			status = StatusImpl.ValidationError;
+	protected void handleValidationErrors(Task task, List<String> messages) {
+		if (status == Status.Ok) {
+			status = Status.ValidationError;
 			failedTask(task);
 		}
 

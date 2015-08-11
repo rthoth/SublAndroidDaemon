@@ -55,7 +55,7 @@ public class TestHelpers {
 			.forTasks(tasks)
 			.setStandardError(System.err)
 			.setStandardOutput(System.out)
-			.withArguments("--info", "--stacktrace", "-I", initScriptPath);
+			.withArguments("-I", initScriptPath);
 
 			return new T3<>(builder, outStream, errStream);
 		}
