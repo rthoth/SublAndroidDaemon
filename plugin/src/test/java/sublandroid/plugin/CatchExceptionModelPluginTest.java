@@ -18,11 +18,11 @@ public class CatchExceptionModelPluginTest {
 
 		Context ctx = Context.from("test-data/projects/java-error-01", GRADLE_EXCEPTION_FILE);
 
-		T3<ModelBuilder<CatchExceptionModel>, ByteArrayOutputStream, ByteArrayOutputStream> t3;
+		T3<ModelBuilder<CatchException>, ByteArrayOutputStream, ByteArrayOutputStream> t3;
 
-		t3 = ctx.model(CatchExceptionModel.class, "clean", "compileDebugJava");
+		t3 = ctx.model(CatchException.class, "clean", "compileDebugJava");
 
-		CatchExceptionModel catchException = t3.a.get();
+		CatchException catchException = t3.a.get();
 
 		assertThat(catchException.getStatus()).isNotNull();
 		assertThat(catchException.getStatus().status()).isEqualTo("ActionError");

@@ -16,39 +16,55 @@ import org.gradle.api.logging.*;
 import org.gradle.api.tasks.*;
 import org.gradle.tooling.provider.model.*;
 
-public class CatchExceptionModelImpl implements 
-CatchExceptionModel, TaskExecutionListener, Serializable, TaskExecutionGraphListener {
+/**
+ * Implementation
+ */
+public class CatchExceptionImpl implements 
+CatchException, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 
-	private static final Logger ACTION_LOGGER = Logging.getLogger("sublandroid.CatchExceptionModel.NotFailAction");
-	private static final Logger LOGGER = Logging.getLogger("sublandroid.CatchExceptionModel");
-	private static final String MODEL_NAME = CatchExceptionModel.class.getName();
+	private static final Logger ACTION_LOGGER = Logging.getLogger("sublandroid.CatchException.ProxyAction");
+	private static final Logger LOGGER = Logging.getLogger("sublandroid.CatchException");
+	private static final Logger VALIDATOR_LOGGER = Logging.getLogger("sublandroid.CatchException.Validator");
+	private static final String MODEL_NAME = CatchException.class.getName();
 
 	public class ModelBuilder implements ToolingModelBuilder {
 
 		@Override
 		public Object buildAll(String modelName, Project project) {
+
+			LOGGER.debug("Trying create model {}", modelName);
+
 			if (MODEL_NAME.equals(modelName))
-				return CatchExceptionModelImpl.this;
+				return CatchExceptionImpl.this;
 			
 			throw new IllegalArgumentException(modelName);
 		}
 
 		@Override
 		public boolean canBuild(String modelName) {
-			return MODEL_NAME.equals(modelName);
+			if (MODEL_NAME.equals(modelName)) {
+
+				LOGGER.debug("Can create model {}", modelName);
+				return true;
+
+			} else {
+
+				LOGGER.debug("Can't create model {}", modelName);
+				return false;
+			}
 		}
 	}
 
-	private class NotFailAction implements Action<Task> {
+	private class ProxyAction implements Action<Task> {
 
 		protected final Action<? super Task> action;
 		protected final Task task;
 
-		public NotFailAction(final Action<? super Task> action, final Task task) {
+		public ProxyAction(final Action<? super Task> action, final Task task) {
 			this.action = action;
 			this.task = task;
 
-			ACTION_LOGGER.info("New for {} in {}", action, task.getPath());
+			ACTION_LOGGER.debug("New for {} in {}", action, task.getPath());
 		}
 
 		@Override
@@ -57,63 +73,68 @@ CatchExceptionModel, TaskExecutionListener, Serializable, TaskExecutionGraphList
 			if (status == Status.Ok) {
 				try {
 					action.execute(task);
-
 				} catch (StopActionException | StopExecutionException stopException) {
 					throw stopException;
-
 				} catch (Throwable throwable) {
+					LOGGER.info("Build just invalid, action error!");
 					status = Status.ActionError;
 					error = throwable;
 					failedTask(task);
 					throw new StopExecutionException();
 				}
 			} else {
-				LOGGER.info("Invalid status...skiping!");
-				throw new StopExecutionException();
+				LOGGER.info("Build already invalid status...skipping!");
+				throw new StopExecutionException("CatchException says nooooooo!");
 			}
 		}
 	}
 
 	// Argh...
-	private class NotFailActionContext extends NotFailAction implements ContextAwareTaskAction {
+	private class ProxyActionContextAware extends ProxyAction implements ContextAwareTaskAction {
 
 		protected final ContextAwareTaskAction contextAware;
 
-		public NotFailActionContext(final Action<? super Task> action, final Task task) {
+		public ProxyActionContextAware(final Action<? super Task> action, final Task task) {
 			super(action, task);
 			contextAware = (ContextAwareTaskAction) action;
 		}
 
 		@Override
 		public void contextualise(final TaskExecutionContext context) {
-			ACTION_LOGGER.info("Context {} for {}", context, contextAware);
+			ACTION_LOGGER.debug("Setting context to {}", contextAware);
 			contextAware.contextualise(context);
 		}
 	}
 
-	private class NotFailTaskValidator implements TaskValidator {
+	private class ProxyValidator implements TaskValidator {
 
 		private final TaskValidator validator;
 
-		public NotFailTaskValidator(TaskValidator validator) {
+		public ProxyValidator(TaskValidator validator) {
 			this.validator = validator;
+			VALIDATOR_LOGGER.debug("New to {}", validator);
 		}
 
 		@Override
 		public void validate(TaskInternal task, Collection<String> messages) {
+
 			if (status == Status.Ok) {
 				List<String> validationMessages = new LinkedList<>();
 				try {
 					this.validator.validate(task, validationMessages);
 				} catch (Throwable throwable) {
+					VALIDATOR_LOGGER.info("Build just failed, unexpected validation error");
 					handleUnexpectedValidationError(task, throwable);
 					return;
 				}
-				
 
 				if (!validationMessages.isEmpty()) {
+					VALIDATOR_LOGGER.info("Build just failed, validation error");
 					handleValidationErrors(task, validationMessages);
 				}
+
+			} else {
+				VALIDATOR_LOGGER.info("Build already invalid, skipping...");
 			}
 		}
 	}
@@ -130,7 +151,7 @@ CatchExceptionModel, TaskExecutionListener, Serializable, TaskExecutionGraphList
 
 	private Status status = Status.Ok;
 
-	public CatchExceptionModelImpl(final Project project) {
+	public CatchExceptionImpl(final Project project) {
 		Gradle gradle = project.getGradle();
 		TaskExecutionGraph graph = gradle.getTaskGraph();
 
@@ -194,7 +215,7 @@ CatchExceptionModel, TaskExecutionListener, Serializable, TaskExecutionGraphList
 				List<TaskValidator> newValidators = new ArrayList<>(oldValidators.size());
 
 				for (TaskValidator oldValidator : oldValidators) {
-					newValidators.add(new NotFailTaskValidator(oldValidator));
+					newValidators.add(new ProxyValidator(oldValidator));
 				}
 
 				defTask.getValidators().clear();
@@ -204,13 +225,13 @@ CatchExceptionModel, TaskExecutionListener, Serializable, TaskExecutionGraphList
 			List<Action<? super Task>> oldActions = task.getActions();
 			List<Action<? super Task>> newActions = new ArrayList<>(oldActions.size());
 
-			NotFailAction newAction;
+			ProxyAction newAction;
 
 			for (Action<? super Task> action : oldActions) {
 				if (action instanceof ContextAwareTaskAction)
-					newAction = new NotFailActionContext(action, task);
+					newAction = new ProxyActionContextAware(action, task);
 				else
-					newAction = new NotFailAction(action, task);
+					newAction = new ProxyAction(action, task);
 
 				newActions.add(newAction);
 			}
@@ -243,14 +264,14 @@ CatchExceptionModel, TaskExecutionListener, Serializable, TaskExecutionGraphList
 		List<Action<? super Task>> oldActions = task.getActions();
 		List<Action<? super Task>> newActions = new ArrayList<>(oldActions.size());
 
-		NotFailAction newAction;
+		ProxyAction newAction;
 		for (Action<? super Task> action : oldActions) {
 
 
 			if (action instanceof ContextAwareTaskAction)
-				newAction = new NotFailActionContext(action, task);
+				newAction = new ProxyActionContextAware(action, task);
 			else
-				newAction = new NotFailAction(action, task);
+				newAction = new ProxyAction(action, task);
 
 			newActions.add(newAction);
 		}

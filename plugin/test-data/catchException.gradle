@@ -8,5 +8,5 @@ initscript {
 }
 
 allprojects {
-	apply plugin: sublandroid.plugin.CatchExceptionModelPlugin
+	apply plugin: sublandroid.plugin.CatchExceptionPlugin
 }
