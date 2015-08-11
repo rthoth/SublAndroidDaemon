@@ -38,4 +38,31 @@ public class CatchExceptionModelPluginTest {
 		error.printStackTrace();
 	}
 
+	@Test
+	public void catchXmlError() {
+		Context ctx = Context.from("test-data/projects/manifest-error-01", GRADLE_EXCEPTION_FILE);
+
+		System.out.println(ctx.directory);
+
+		T3<ModelBuilder<CatchException>, ByteArrayOutputStream, ByteArrayOutputStream> t3;
+
+		t3 = ctx.model(CatchException.class, "clean", "check");
+
+		CatchException catchException = t3.a.get();
+
+		assertThat(catchException.getStatus()).isNotNull();
+		assertThat(catchException.getStatus().status()).isEqualTo("ActionError");
+		assertThat(catchException.getFailedTaskName()).isEqualTo("processDebugResources");
+
+		Throwable cause = catchException.getError();
+
+		assertThat(cause).isNotNull();
+
+		for (; cause != null; cause = cause.getCause()) {
+			System.out.println("-------\n" + cause.getMessage() + "\n------");
+		}
+
+		catchException.getError().printStackTrace();
+	}
+
 }
