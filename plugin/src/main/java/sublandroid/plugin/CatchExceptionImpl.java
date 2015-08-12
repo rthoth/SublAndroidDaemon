@@ -138,8 +138,6 @@ CatchException, TaskExecutionListener, TaskExecutionGraphListener, Serializable 
 		}
 	}
 
-	private List<String> tasks = new LinkedList<>();
-
 	private Throwable error = null;
 
 	private List<String> errors = new LinkedList<>();
@@ -150,22 +148,14 @@ CatchException, TaskExecutionListener, TaskExecutionGraphListener, Serializable 
 
 	private Status status = Status.Ok;
 
+	private List<String> tasks = new LinkedList<>();
+
 	public CatchExceptionImpl(final Project project) {
 		Gradle gradle = project.getGradle();
 		TaskExecutionGraph graph = gradle.getTaskGraph();
 
 		graph.addTaskExecutionGraphListener(this);
 		graph.addTaskExecutionListener(this);
-	}
-
-	@Override
-	public List<String> getTasks() {
-		return tasks;
-	}
-
-	@Override
-	public Status getStatus() {
-		return status;
 	}
 
 	@Override
@@ -186,6 +176,16 @@ CatchException, TaskExecutionListener, TaskExecutionGraphListener, Serializable 
 	@Override
 	public String getFailedTaskPath() {
 		return failedTaskPath;
+	}
+
+	@Override
+	public List<String> getTasks() {
+		return tasks;
+	}
+
+	@Override
+	public Status getStatus() {
+		return status;
 	}
 
 	@Override
