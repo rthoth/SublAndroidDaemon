@@ -275,7 +275,6 @@ CatchException, TaskExecutionListener, TaskExecutionGraphListener, Serializable 
 		ProxyAction newAction;
 		for (Action<? super Task> action : oldActions) {
 
-
 			if (action instanceof ContextAwareTaskAction)
 				newAction = new ProxyActionContextAware(action, task);
 			else
