@@ -159,6 +159,16 @@ CatchException, TaskExecutionListener, TaskExecutionGraphListener, Serializable 
 	}
 
 	@Override
+	public void afterExecute(Task task, TaskState taskState) {
+		// NOP
+	}
+
+	@Override
+	public void beforeExecute(Task task) {
+		// NOP
+	}
+
+	@Override
 	public Throwable getError() {
 		return error;
 	}
@@ -188,22 +198,13 @@ CatchException, TaskExecutionListener, TaskExecutionGraphListener, Serializable 
 		return status;
 	}
 
-	@Override
-	public void afterExecute(Task task, TaskState taskState) {
-		// NOP
-	}
-
-	@Override
-	public void beforeExecute(Task task) {
-		// NOP
-	}
-
 
 	private void failedTask(Task task) {
 		failedTaskName = task.getName();
 		failedTaskPath = task.getPath();
 	}
 
+	@Override
 	public void graphPopulated(final TaskExecutionGraph graph) {
 		for (Task task : graph.getAllTasks()) {
 
