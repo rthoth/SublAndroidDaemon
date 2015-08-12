@@ -1,0 +1,12 @@
+initscript {
+	dependencies {
+		classpath files(
+			'../../build/libs/sublandroid-core.jar',
+			'../../build/libs/sublandroid-plugin.jar'
+		)
+	}
+}
+
+allprojects {
+	apply plugin: sublandroid.plugin.CatchExceptionPlugin
+}
