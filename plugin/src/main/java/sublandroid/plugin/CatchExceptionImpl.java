@@ -77,9 +77,7 @@ CatchException, TaskExecutionListener, TaskExecutionGraphListener, Serializable 
 					throw stopException;
 				} catch (Throwable throwable) {
 					LOGGER.info("Build just invalid, action error!");
-					status = Status.ActionError;
-					error = throwable;
-					failedTask(task);
+					handleActionError(task, throwable);
 					throw new StopExecutionException();
 				}
 			} else {
@@ -89,7 +87,7 @@ CatchException, TaskExecutionListener, TaskExecutionGraphListener, Serializable 
 		}
 	}
 
-	// Argh...
+	// Argh...Something actins needs context
 	private class ProxyActionContextAware extends ProxyAction implements ContextAwareTaskAction {
 
 		protected final ContextAwareTaskAction contextAware;
@@ -106,6 +104,7 @@ CatchException, TaskExecutionListener, TaskExecutionGraphListener, Serializable 
 		}
 	}
 
+	// Gradle validates tasks before invoke actions...
 	private class ProxyValidator implements TaskValidator {
 
 		private final TaskValidator validator;
@@ -238,6 +237,14 @@ CatchException, TaskExecutionListener, TaskExecutionGraphListener, Serializable 
 
 			task.setActions(newActions);
 			// Remove validators...
+		}
+	}
+
+	protected void handleActionError(Task task, Throwable throwable) {
+		if (status == Status.Ok) {
+			status = Status.ActionError;
+			error = throwable;
+			failedTask(task);
 		}
 	}
 
