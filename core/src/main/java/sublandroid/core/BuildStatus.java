@@ -7,7 +7,7 @@ import org.gradle.tooling.model.*;
 /**
  * Capture any gradle errors for any tasks, well this tries!
  */
-public interface CatchException extends Model  {
+public interface BuildStatus extends Model  {
 
 	public static interface Status extends java.io.Serializable {
 

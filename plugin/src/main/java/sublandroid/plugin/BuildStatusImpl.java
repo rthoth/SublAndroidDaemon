@@ -19,13 +19,13 @@ import org.gradle.tooling.provider.model.*;
 /**
  * Implementation
  */
-public class CatchExceptionImpl implements 
-CatchException, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
+public class BuildStatusImpl implements 
+BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 
-	private static final Logger ACTION_LOGGER = Logging.getLogger("sublandroid.CatchException.ProxyAction");
-	private static final Logger LOGGER = Logging.getLogger("sublandroid.CatchException");
-	private static final Logger VALIDATOR_LOGGER = Logging.getLogger("sublandroid.CatchException.Validator");
-	private static final String MODEL_NAME = CatchException.class.getName();
+	private static final Logger ACTION_LOGGER = Logging.getLogger("sublandroid.BuildStatus.ProxyAction");
+	private static final Logger LOGGER = Logging.getLogger("sublandroid.BuildStatus");
+	private static final Logger VALIDATOR_LOGGER = Logging.getLogger("sublandroid.BuildStatus.Validator");
+	private static final String MODEL_NAME = BuildStatus.class.getName();
 
 	public class ModelBuilder implements ToolingModelBuilder {
 
@@ -35,7 +35,7 @@ CatchException, TaskExecutionListener, TaskExecutionGraphListener, Serializable 
 			LOGGER.debug("Trying create model {}", modelName);
 
 			if (MODEL_NAME.equals(modelName))
-				return CatchExceptionImpl.this;
+				return BuildStatusImpl.this;
 			
 			throw new IllegalArgumentException(modelName);
 		}
@@ -82,7 +82,7 @@ CatchException, TaskExecutionListener, TaskExecutionGraphListener, Serializable 
 				}
 			} else {
 				LOGGER.info("Build already invalid status...skipping!");
-				throw new StopExecutionException("CatchException says nooooooo!");
+				throw new StopExecutionException("BuildStatus says nooooooo!");
 			}
 		}
 	}
@@ -150,7 +150,7 @@ CatchException, TaskExecutionListener, TaskExecutionGraphListener, Serializable 
 
 	private List<String> tasks = new LinkedList<>();
 
-	public CatchExceptionImpl(final Project project) {
+	public BuildStatusImpl(final Project project) {
 		Gradle gradle = project.getGradle();
 		TaskExecutionGraph graph = gradle.getTaskGraph();
 

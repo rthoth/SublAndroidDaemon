@@ -49,7 +49,7 @@ public class Daemon implements AutoCloseable {
 
 	private BufferedReader reader = null;
 	private Listener listener = null;
-	private Thread serverThread = null;
+	private Thread listenerThread = null;
 	private BufferedWriter writer = null;
 
 	public Daemon(String file) throws IOException {
@@ -146,8 +146,8 @@ public class Daemon implements AutoCloseable {
 			throw new IllegalStateException("Failed listen at " + port, throwable);
 		}
 
-		serverThread = new Thread(listener, "SublAndroid-Listener");
-		serverThread.start();
+		listenerThread = new Thread(listener, "SublAndroid-Listener");
+		listenerThread.start();
 	}
 
 	public void response(boolean success, Message message) {

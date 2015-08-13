@@ -10,21 +10,18 @@ import org.gradle.api.logging.*;
 import org.gradle.tooling.provider.model.*;
 
 
-public class CatchExceptionPlugin implements Plugin<Project> {
-
-	private static final Logger LOGGER = Logging.getLogger("sublandroid.CatchExceptionPlugin");
+public class BuildStatusPlugin implements Plugin<Project> {
 
 	private final ToolingModelBuilderRegistry modelBuilderRegistry;
 
 	@Inject
-	public CatchExceptionPlugin(ToolingModelBuilderRegistry modelBuilderRegistry) {
+	public BuildStatusPlugin(ToolingModelBuilderRegistry modelBuilderRegistry) {
 		this.modelBuilderRegistry = modelBuilderRegistry;
 	}
 
 	@Override
 	public void apply(final Project project) {
-
-		final CatchExceptionImpl model = new CatchExceptionImpl(project);
+		final BuildStatusImpl model = new BuildStatusImpl(project);
 		modelBuilderRegistry.register(model.new ModelBuilder());
 	}
 }

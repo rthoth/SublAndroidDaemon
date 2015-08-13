@@ -11,18 +11,18 @@ import org.testng.annotations.*;
 import static sublandroid.plugin.TestHelpers.*;
 import static org.assertj.core.api.Assertions.*;
 
-public class CatchExceptionModelPluginTest {
+public class BuildStatusPluginTest {
 
 	@Test
 	public void catchJavaError() {
 
 		Context ctx = Context.from("test-data/projects/java-error-01", GRADLE_EXCEPTION_FILE);
 
-		T3<ModelBuilder<CatchException>, ByteArrayOutputStream, ByteArrayOutputStream> t3;
+		T3<ModelBuilder<BuildStatus>, ByteArrayOutputStream, ByteArrayOutputStream> t3;
 
-		t3 = ctx.model(CatchException.class, "clean", "compileDebugJava");
+		t3 = ctx.model(BuildStatus.class, "clean", "compileDebugJava");
 
-		CatchException catchException = t3.a.get();
+		BuildStatus catchException = t3.a.get();
 
 		assertThat(catchException.getStatus()).isNotNull();
 		assertThat(catchException.getStatus().status()).isEqualTo("ActionError");
@@ -44,11 +44,11 @@ public class CatchExceptionModelPluginTest {
 
 		System.out.println(ctx.directory);
 
-		T3<ModelBuilder<CatchException>, ByteArrayOutputStream, ByteArrayOutputStream> t3;
+		T3<ModelBuilder<BuildStatus>, ByteArrayOutputStream, ByteArrayOutputStream> t3;
 
-		t3 = ctx.model(CatchException.class, "clean", "check");
+		t3 = ctx.model(BuildStatus.class, "clean", "check");
 
-		CatchException catchException = t3.a.get();
+		BuildStatus catchException = t3.a.get();
 
 		assertThat(catchException.getStatus()).isNotNull();
 		assertThat(catchException.getStatus().status()).isEqualTo("ActionError");
