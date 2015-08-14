@@ -61,7 +61,7 @@ jar {
 }
 
 dependencies {
-	compile 'org.gradle:gradle-tooling-api:2.4'
+	compile gradleApi()
 	compile 'com.alibaba:fastjson:1.2.6'
 	compile project(':core')
 
