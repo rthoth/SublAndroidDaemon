@@ -101,6 +101,7 @@ public abstract class Command {
 			final ModelBuilder<T> builder = connection.<T> model(modelClass);
 			builder.setStandardOutput(standardOut = new ByteArrayOutputStream());
 			builder.setStandardError(standardErr = new ByteArrayOutputStream());
+			builder.withArguments("--init-script", initScript.fileName());
 
 
 			return builder.get();
