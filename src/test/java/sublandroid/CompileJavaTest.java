@@ -46,7 +46,7 @@ public class CompileJavaTest {
 
 			MHighlight failure = result.failures.get(0);
 
-			final String Main_java = absolutePath(JAVA_SINTAX_ERROR,"src","main","java","com","app","Main.java");
+			final String Main_java = absolutePath(JAVA_SINTAX_ERROR,"src","main","java","org","error","Main.java");
 
 			assertThat(failure.fileName).isEqualTo(Main_java);
 			assertThat(failure.lineNumber).isEqualTo(12);

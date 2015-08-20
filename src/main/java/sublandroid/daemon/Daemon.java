@@ -3,6 +3,7 @@ package sublandroid.daemon;
 import sublandroid.IOUtils;
 import sublandroid.messages.*;
 import sublandroid.command.*;
+import static sublandroid.Log.*;
 
 import static java.lang.String.format;
 import java.io.*;
@@ -16,10 +17,6 @@ import static com.alibaba.fastjson.JSON.writeJSONStringTo;
 
 
 public class Daemon implements AutoCloseable {
-
-	protected static void println(String msg, Object... args) {
-		System.out.println(format(msg, args));
-	}
 
 	public static void main(String args[]) {
 		if (args.length == 0)
@@ -150,7 +147,7 @@ public class Daemon implements AutoCloseable {
 		listenerThread.start();
 	}
 
-	public void response(boolean success, Message message) {
+	private void response(boolean success, Message message) {
 		try {
 
 			if (success)

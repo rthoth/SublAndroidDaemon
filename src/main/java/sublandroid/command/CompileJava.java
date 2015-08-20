@@ -1,6 +1,8 @@
 package sublandroid.command;
 
+import sublandroid.core.*;
 import sublandroid.messages.*;
+import sublandroid.plugin.*;
 
 import java.io.*;
 import java.util.*;
@@ -26,90 +28,13 @@ public class CompileJava extends Command {
 	public Message execute(MCommand mCommand, ProjectConnection connection)	{
 		final Context context = Context.from(connection);
 
-		context.tasks(GRADLE_TASK);
+		ModelInvocation<BuildStatus> invocation = context.plugin(BuildStatusPlugin.class)
+		                              .model(BuildStatus.class, GRADLE_TASK);
 
 		final MJavaCompile message = new MJavaCompile();
 
-		try {
-			context.run();
-		} catch (BuildException buildEx) {
-
-			processJavaErrors(message, context);
-
-			if (message.failures == null)
-				throw buildEx;
-		}
+		BuildStatus buildStatus = invocation.get();
 
 		return message;
-	}
-
-	protected int cannotFindSymbol(final MHighlight highlight, int line, String[] lines) {
-			final Matcher symbolMatcher = DETAIL_PATTERN.matcher(lines[++line]);
-			final Matcher locationMatcher = DETAIL_PATTERN.matcher(lines[++line]);
-
-			final String symbol = symbolMatcher.matches() ? symbolMatcher.group(2) : "";
-			final String location = locationMatcher.matches() ? locationMatcher.group(2) : "";
-			
-			highlight.description = String.format("%s %s in %s", highlight.what, symbol, location);
-
-			return 2;
-	}
-
-	protected int semanticError(final MHighlight highlight, int line, String[] lines) {
-		LinkedList<String> details = new LinkedList<>();
-		int i = line;
-
-		for (Matcher detailMatcher; (i + 1) < lines.length;) {
-			
-			detailMatcher = DETAIL_PATTERN.matcher(lines[++i]);
-			
-			if (detailMatcher.matches()) {
-				details.add(String.format("(%s: %s)", detailMatcher.group(1), detailMatcher.group(2)));
-			} else {
-				--i;
-				break;
-			}
-		}
-
-		final StringBuilder description = new StringBuilder();
-
-		while (!details.isEmpty()) {
-			description.append(details.poll());
-			if (!details.isEmpty())
-				description.append(", ");
-		}
-
-		highlight.description = description.toString();
-
-		return i - line;
-	}
-
-	protected void processJavaErrors(final MJavaCompile message, final Context ctx) {
-		final String errOut = new String(ctx.error.toByteArray());
-
-		final String[] lines = LINE_BREAK_PATTERN.split(errOut);
-
-		for (int i=0; i<lines.length; i++) {
-			final Matcher matcher = ERROR_PATTERN.matcher(lines[i]);
-
-			if (matcher.matches()) {
-				final String fileName = matcher.group(1);
-				final int lineNumber = Integer.parseInt(matcher.group(2));
-				final String kind = matcher.group(3);
-				final String what = matcher.group(4);
-				final String where = lines[++i];
-				i++;
-
-				MHighlight highlight = new MHighlight(fileName, lineNumber, kind, what, where);
-
-				if (CANNOT_FIND_SYMBOL.equals(what))
-					i += cannotFindSymbol(highlight, i, lines);
-				
-				else if (SEMANTIC_ERROR.matcher(what).find())
-					i += semanticError(highlight, i, lines);
-
-				message.addJavaFailure(highlight);
-			}
-		}
 	}
 }

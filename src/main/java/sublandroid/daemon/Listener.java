@@ -4,6 +4,7 @@ import java.net.*;
 import java.io.*;
 
 import sublandroid.IOUtils;
+import static sublandroid.Log.*;
 
 public class Listener implements Runnable, AutoCloseable {
 
@@ -34,7 +35,7 @@ public class Listener implements Runnable, AutoCloseable {
 	public void run() {
 		try {
 			serverSocket = new ServerSocket(port, 1, InetAddress.getLoopbackAddress());
-			daemon.println("SublAndroid listen @ %d", serverSocket.getLocalPort());
+			println("SublAndroid listen @ %d", serverSocket.getLocalPort());
 
 			boolean loop = true;
 			while (loop) {
@@ -47,13 +48,13 @@ public class Listener implements Runnable, AutoCloseable {
 				clientWriter = null;
 
 				clientSocket = serverSocket.accept();
-				daemon.println("Woohoo! I've a new sublandroid developer!");
+				println("Woohoo! I've a new sublandroid developer!");
 
 				try {
 					clientReader = new InputStreamReader(clientSocket.getInputStream());
 					clientWriter = new OutputStreamWriter(clientSocket.getOutputStream());
 				} catch (Throwable throwable) {
-					daemon.println("Ops! Problems with my little friend!");
+					println("Ops! Problems with my little friend!");
 					throwable.printStackTrace();
 				}
 
@@ -64,7 +65,7 @@ public class Listener implements Runnable, AutoCloseable {
 					daemon.talk(clientReader, clientWriter);
 				} catch (SocketException socketException) {
 					if (serverSocket.isClosed()) {
-						daemon.println("Exiting...");
+						println("Exiting...");
 						loop = false;
 					} else {
 						IOUtils.close(clientSocket);
