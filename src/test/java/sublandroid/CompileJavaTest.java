@@ -38,7 +38,7 @@ public class CompileJavaTest {
 			
 			send(MCommand.from("compileJava"), context.writer);
 
-			MJavaCompile result = read(context.reader, MJavaCompile.class);
+			MSourceHighlights result = read(context.reader, MSourceHighlights.class);
 
 			assertThat(result).isNotNull();
 			assertThat(result.failures).isNotNull();
@@ -70,7 +70,7 @@ public class CompileJavaTest {
 		try (ClientContext context = new ClientContext(JAVA_ERRORS_01, 12098)) {
 			send(MCommand.from("compileJava"), context.writer);
 
-			MJavaCompile result = read(context.reader, MJavaCompile.class);
+			MSourceHighlights result = read(context.reader, MSourceHighlights.class);
 
 			assertThat(result).isNotNull();
 			assertThat(result.failures).isNotNull();

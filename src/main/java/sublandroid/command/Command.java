@@ -21,7 +21,7 @@ public abstract class Command {
 
 		public GradleInvocation(
 			Collection<File> jars,
-			Collection<Class<? extends Plugin<Project>>> plugins,
+			Collection<Class<? extends Plugin<?>>> plugins,
 			ProjectConnection connection
 		) {
 
@@ -30,32 +30,49 @@ public abstract class Command {
 			this.connection = connection;
 		}
 
+	}
+
+	public static class Gradle {
+
+		public static Gradle from(ProjectConnection connection) {
+			return new Gradle(connection);
+		}
+
+		private final ProjectConnection connection;
+		private final Collection<File> jars;
+		private final Collection<Class<? extends Plugin<?>>> plugins;
+
+		private Gradle(final ProjectConnection connection) {
+			this(connection, null, null);
+		}
+
+		private Gradle(
+			final ProjectConnection connection,
+			Collection<File> jars,
+			Collection<Class<? extends Plugin<?>>> plugins) {
+
+			this.connection = connection;
+			this.jars = jars;
+			this.plugins = plugins;
+		}
+
 		public <T extends Model> ModelInvocation<T> model(Class<T> modelClass, String... tasks) {
+
+			final InitScript initScript = new InitScript();
+			initScript.jars(jars);
+			initScript.plugins(plugins);
+
 			return new ModelInvocation(
 				initScript, modelClass, connection, tasks
 			);
 		}
 
-	}
-
-	protected static class Context {
-
-		public static Context from(ProjectConnection connection) {
-			return new Context(connection);
-		}
-
-		private final ProjectConnection connection;
-
-		public Context(final ProjectConnection connection) {
-			this.connection = connection;
-		}
-
-		public GradleInvocation plugin(Class<? extends Plugin<Project>>... pluginClasses) {
+		public Gradle plugins(Class<? extends Plugin<?>>... pluginClasses) {
 
 			final TreeSet<File> jars = new TreeSet<>();
-			final List<Class<? extends Plugin<Project>>> plugins = new ArrayList<>(pluginClasses.length);
+			final List<Class<? extends Plugin<?>>> plugins = new ArrayList<>(pluginClasses.length);
 
-			for (Class<? extends Plugin<Project>> pluginClass : pluginClasses) {
+			for (Class<? extends Plugin<?>> pluginClass : pluginClasses) {
 				final File jar = InitScript.findJar(pluginClass);
 
 				if (!jars.contains(jar))
@@ -64,7 +81,7 @@ public abstract class Command {
 				plugins.add(pluginClass);
 			}
 
-			return new GradleInvocation(jars, plugins, connection);
+			return new Gradle(connection, jars, plugins);
 		}
 	}
 
@@ -101,7 +118,9 @@ public abstract class Command {
 			final ModelBuilder<T> builder = connection.<T> model(modelClass);
 			builder.setStandardOutput(standardOut = new ByteArrayOutputStream());
 			builder.setStandardError(standardErr = new ByteArrayOutputStream());
-			builder.withArguments("--init-script", initScript.fileName());
+
+			if (initScript.isNecessary())
+				builder.withArguments("--init-script", initScript.fileName());
 
 
 			return builder.get();

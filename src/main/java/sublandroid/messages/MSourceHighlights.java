@@ -2,14 +2,18 @@ package sublandroid.messages;
 
 import java.util.*;
 
-public class MResourceCompile extends Message {
+public class MSourceHighlights extends Message {
+
 
 	public List<MHighlight> failures = null;
 
+	public MSourceHighlights() {
 
-	public MResourceCompile addFailure(MHighlight highlight) {
+	}
+
+	public MSourceHighlights addFailure(MHighlight highlight) {
+
 		if (highlight != null) {
-
 			if (failures == null)
 				failures = new LinkedList<>();
 

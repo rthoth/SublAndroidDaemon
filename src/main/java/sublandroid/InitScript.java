@@ -36,7 +36,7 @@ public class InitScript {
 	}
 
 	private List<File> jars = null;
-	private List<Class<? extends Plugin<Project>>> plugins = null;
+	private List<Class<? extends Plugin<?>>> plugins = null;
 	private File file = null;
 
 	public synchronized String fileName() {
@@ -84,13 +84,17 @@ public class InitScript {
 
 	}
 
+	public boolean isNecessary() {
+		return (jars != null && !jars.isEmpty()) || (plugins != null && !plugins.isEmpty());
+	}
+
 	public void jars(Collection<File> jars) {
 		this.jars = new ArrayList<>();
 		this.jars.add(SUBLANDROID_CORE_JAR);
 		this.jars.addAll(jars);
 	}
 
-	public void plugins(Collection<Class<? extends Plugin<Project>>> plugins) {
+	public void plugins(Collection<Class<? extends Plugin<?>>> plugins) {
 		this.plugins = new ArrayList(plugins);
 	}
 

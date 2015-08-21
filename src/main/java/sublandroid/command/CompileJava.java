@@ -9,6 +9,8 @@ import java.util.*;
 import java.util.regex.*;
 import org.gradle.tooling.*;
 
+import static sublandroid.core.BuildStatus.*;
+
 public class CompileJava extends Command {
 
 	public static final String COMMAND = "compileJava";
@@ -26,7 +28,7 @@ public class CompileJava extends Command {
 
 	@Override
 	public Message execute(MCommand mCommand, ProjectConnection connection)	{
-		final Context context = Context.from(connection);
+		/*final Context context = Context.from(connection);
 
 		ModelInvocation<BuildStatus> invocation = context.plugin(BuildStatusPlugin.class)
 		                              .model(BuildStatus.class, GRADLE_TASK);
@@ -35,6 +37,21 @@ public class CompileJava extends Command {
 
 		BuildStatus buildStatus = invocation.get();
 
-		return message;
+		return message;*/
+
+
+		final ModelInvocation<BuildStatus> invocation = Gradle.from(connection)
+		                                                 .plugins(BuildStatusPlugin.class)
+		                                                 .model(BuildStatus.class, GRADLE_TASK);
+
+    	final MSourceHighlights message = new MSourceHighlights();
+
+    	BuildStatus buildStatus = invocation.get();
+
+    	if (buildStatus.getStatus() != Status.Ok) {
+    		message.addFailure(null);
+    	}
+
+    	return message;
 	}
 }

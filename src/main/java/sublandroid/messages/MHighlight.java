@@ -2,6 +2,7 @@ package sublandroid.messages;
 
 
 public class MHighlight extends Message {
+		public String language;
 		public String fileName;
 		public int lineNumber;
 		public String kind;
@@ -14,17 +15,18 @@ public class MHighlight extends Message {
 		}
 
 		public MHighlight(
-			String fileName, int lineNumber, String kind,
+			String language, String fileName, int lineNumber, String kind,
 			String what, String where) {
 
-			this(fileName, lineNumber, kind, what, where, null);
+			this(language, fileName, lineNumber, kind, what, where, null);
 		}
 		
 
 		public MHighlight(
-			String fileName, int lineNumber, String kind,
+			String language, String fileName, int lineNumber, String kind,
 			String what, String where, String description) {
 
+			this.language = language;
 			this.fileName = fileName;
 			this.lineNumber = lineNumber;
 			this.kind = kind;
