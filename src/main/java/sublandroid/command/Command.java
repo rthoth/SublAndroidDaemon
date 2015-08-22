@@ -91,14 +91,16 @@ public abstract class Command {
 			return standardOut;
 		}
 
-		protected void setup(LongRunningOperation longRunningOperation) {
+		protected <R extends LongRunningOperation> R setup(R operation) {
 			if (!invoked) {
-				longRunningOperation.setStandardError(standardErr = new ByteArrayOutputStream());
-				longRunningOperation.setStandardOutput(standardOut = new ByteArrayOutputStream());
+				operation.setStandardError(standardErr = new ByteArrayOutputStream());
+				operation.setStandardOutput(standardOut = new ByteArrayOutputStream());
 
 				if (initScript.isNecessary())
-					longRunningOperation.withArguments("--init-script", initScript.fileName());
+					operation.withArguments("--init-script", initScript.fileName());
 			}
+
+			return operation;
 		}
 	}
 
@@ -122,8 +124,7 @@ public abstract class Command {
 			if (invoked)
 				throw new IllegalStateException();
 
-			final ModelBuilder<T> builder = connection.<T> model(modelClass);
-			setup(builder);
+			final ModelBuilder<T> builder = setup(connection.<T> model(modelClass));
 
 			invoked = true;
 
