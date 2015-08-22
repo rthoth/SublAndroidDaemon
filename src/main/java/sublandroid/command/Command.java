@@ -134,9 +134,9 @@ public abstract class Command {
 
 	protected static final Pattern LINE_BREAK_PATTERN = Pattern.compile("[\\r\\n]+");
 
-	public abstract Message execute(MCommand mCommand, ProjectConnection connection);
-
 	protected void println(String message, Object... objects) {
 		System.out.printf(message + '\n', objects);
 	}
+
+	public abstract Message execute(MCommand mCommand, ProjectConnection connection);
 }
