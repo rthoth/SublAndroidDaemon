@@ -25,7 +25,7 @@ public class BuildStatusPluginTest {
 		BuildStatus catchException = t3.a.get();
 
 		assertThat(catchException.getStatus()).isNotNull();
-		assertThat(catchException.getStatus().status()).isEqualTo("ActionError");
+		assertThat(catchException.getStatus().code()).isEqualTo("ActionError");
 		assertThat(catchException.getFailedTaskName()).isEqualTo("compileDebugJava");
 
 		Throwable error = catchException.getError();
@@ -51,7 +51,7 @@ public class BuildStatusPluginTest {
 		BuildStatus catchException = t3.a.get();
 
 		assertThat(catchException.getStatus()).isNotNull();
-		assertThat(catchException.getStatus().status()).isEqualTo("ActionError");
+		assertThat(catchException.getStatus().code()).isEqualTo("ActionError");
 		assertThat(catchException.getFailedTaskName()).isEqualTo("processDebugResources");
 
 		Throwable cause = catchException.getError();

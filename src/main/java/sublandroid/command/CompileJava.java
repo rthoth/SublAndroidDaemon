@@ -28,17 +28,6 @@ public class CompileJava extends Command {
 
 	@Override
 	public Message execute(MCommand mCommand, ProjectConnection connection)	{
-		/*final Context context = Context.from(connection);
-
-		ModelInvocation<BuildStatus> invocation = context.plugin(BuildStatusPlugin.class)
-		                              .model(BuildStatus.class, GRADLE_TASK);
-
-		final MJavaCompile message = new MJavaCompile();
-
-		BuildStatus buildStatus = invocation.get();
-
-		return message;*/
-
 
 		final ModelInvocation<BuildStatus> invocation = Gradle.from(connection)
 		                                                 .plugins(BuildStatusPlugin.class)
@@ -48,9 +37,13 @@ public class CompileJava extends Command {
 
     	BuildStatus buildStatus = invocation.get();
 
-    	if (buildStatus.getStatus() != Status.Ok) {
+    	if (buildStatus.getStatus().code() == Status.Ok.code()) {
     		message.addFailure(null);
+    		println("Status = %s", buildStatus.getStatus().code());
+    	} else {
+    		println("Disse que não é Ok, %s", buildStatus.getStatus().code());
     	}
+
 
     	return message;
 	}

@@ -14,23 +14,6 @@ import org.gradle.tooling.*;
 import org.gradle.tooling.model.*;
 
 public abstract class Command {
-	protected static class GradleInvocation {
-
-		private final InitScript initScript = new InitScript();
-		private final ProjectConnection connection;
-
-		public GradleInvocation(
-			Collection<File> jars,
-			Collection<Class<? extends Plugin<?>>> plugins,
-			ProjectConnection connection
-		) {
-
-			initScript.jars(jars);
-			initScript.plugins(plugins);
-			this.connection = connection;
-		}
-
-	}
 
 	public static class Gradle {
 
@@ -85,17 +68,44 @@ public abstract class Command {
 		}
 	}
 
-	protected static class ModelInvocation<T extends Model> {
+	public static class Invocation {
 
-		private final InitScript initScript;
-		private final Class<T> modelClass;
-		private final ProjectConnection connection;
+		protected final ProjectConnection connection;
+		protected final InitScript initScript;
+		
+		private ByteArrayOutputStream standardErr = null;
+		private ByteArrayOutputStream standardOut = null;
+
+		protected boolean invoked = false;
+
+		protected Invocation(InitScript initScript, ProjectConnection connection) {
+			this.initScript = initScript;
+			this.connection = connection;
+		}
+
+		public ByteArrayOutputStream getStandardErr() {
+			return standardErr;
+		}
+
+		public ByteArrayOutputStream getStandardOut() {
+			return standardOut;
+		}
+
+		protected void setup(LongRunningOperation longRunningOperation) {
+			if (!invoked) {
+				longRunningOperation.setStandardError(standardErr = new ByteArrayOutputStream());
+				longRunningOperation.setStandardOutput(standardOut = new ByteArrayOutputStream());
+
+				if (initScript.isNecessary())
+					longRunningOperation.withArguments("--init-script", initScript.fileName());
+			}
+		}
+	}
+
+	public static class ModelInvocation<T extends Model> extends Invocation {
+
 		private final String[] tasks;
-
-		private boolean getted = false;
-
-		public ByteArrayOutputStream standardOut = null;
-		public ByteArrayOutputStream standardErr = null;
+		private final Class<T> modelClass;
 
 		public ModelInvocation(
 			InitScript initScript,
@@ -103,25 +113,19 @@ public abstract class Command {
 			ProjectConnection connection,
 			String... tasks
 		) {
-			this.initScript = initScript;
+			super(initScript, connection);
 			this.modelClass = modelClass;
-			this.connection = connection;
 			this.tasks = tasks;
 		}
 
 		public synchronized T get() {
-			if (getted)
+			if (invoked)
 				throw new IllegalStateException();
 
-			getted = true;
-
 			final ModelBuilder<T> builder = connection.<T> model(modelClass);
-			builder.setStandardOutput(standardOut = new ByteArrayOutputStream());
-			builder.setStandardError(standardErr = new ByteArrayOutputStream());
+			setup(builder);
 
-			if (initScript.isNecessary())
-				builder.withArguments("--init-script", initScript.fileName());
-
+			invoked = true;
 
 			return builder.get();
 		}
@@ -132,6 +136,6 @@ public abstract class Command {
 	public abstract Message execute(MCommand mCommand, ProjectConnection connection);
 
 	protected void println(String message, Object... objects) {
-		System.out.println(String.format(message, objects));
+		System.out.printf(message + '\n', objects);
 	}
 }

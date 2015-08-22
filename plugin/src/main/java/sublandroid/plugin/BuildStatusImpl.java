@@ -36,7 +36,7 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 
 			if (MODEL_NAME.equals(modelName))
 				return BuildStatusImpl.this;
-			
+
 			throw new IllegalArgumentException(modelName);
 		}
 
@@ -44,12 +44,11 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 		public boolean canBuild(String modelName) {
 			if (MODEL_NAME.equals(modelName)) {
 
-				LOGGER.debug("Can create model {}", modelName);
+				LOGGER.debug("I can create model {}", modelName);
 				return true;
-
 			} else {
 
-				LOGGER.debug("Can't create model {}", modelName);
+				LOGGER.debug("I can't create model {}", modelName);
 				return false;
 			}
 		}
@@ -72,15 +71,19 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 
 			if (status == Status.Ok) {
 				try {
+
 					action.execute(task);
 				} catch (StopActionException | StopExecutionException stopException) {
+
 					throw stopException;
 				} catch (Throwable throwable) {
+
 					LOGGER.info("Build just invalid, action error!");
 					handleActionError(task, throwable);
 					throw new StopExecutionException();
 				}
 			} else {
+
 				LOGGER.info("Build already invalid status...skipping!");
 				throw new StopExecutionException("BuildStatus says nooooooo!");
 			}

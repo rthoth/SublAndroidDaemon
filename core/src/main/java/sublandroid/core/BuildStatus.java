@@ -12,23 +12,23 @@ public interface BuildStatus extends Model  {
 	public static interface Status extends java.io.Serializable {
 
 		static final Status ActionError = new Status() {
-			public String status() { return "ActionError"; }
+			public String code() { return "ActionError"; }
 		};
 
 		static final Status Ok = new Status() {
-			public String status() { return "Ok"; }
+			public String code() { return "Ok"; }
 		};
 
 		static final Status UnexpectedValidationError = new Status() {
-			public String status() { return "UnexpectedValidationError"; }
+			public String code() { return "UnexpectedValidationError"; }
 		};
 
 		static final Status ValidationError = new Status() {
-			public String status() { return "ValidationError"; }
+			public String code() { return "ValidationError"; }
 		};
 
 
-		String status();
+		String code();
 
 	}
 	
