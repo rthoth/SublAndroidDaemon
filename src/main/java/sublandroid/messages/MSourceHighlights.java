@@ -13,12 +13,19 @@ public class MSourceHighlights extends Message {
 
 	public MSourceHighlights addFailure(MHighlight highlight) {
 
-		if (highlight != null) {
-			if (failures == null)
-				failures = new LinkedList<>();
+		if (failures == null)
+			failures = new LinkedList<>();
 
-			failures.add(highlight);
-		}
+		failures.add(highlight);
+
+		return this;
+	}
+
+	public MSourceHighlights addFailures(final Collection<MHighlight> failures) {
+		if (this.failures == null)
+			this.failures = new ArrayList<>(failures);
+		else
+			this.failures.addAll(failures);
 
 		return this;
 	}

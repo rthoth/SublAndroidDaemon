@@ -72,15 +72,17 @@ public abstract class Command {
 
 		protected final ProjectConnection connection;
 		protected final InitScript initScript;
+		protected final String[] tasks;
 		
 		private ByteArrayOutputStream standardErr = null;
 		private ByteArrayOutputStream standardOut = null;
 
 		protected boolean invoked = false;
 
-		protected Invocation(InitScript initScript, ProjectConnection connection) {
+		protected Invocation(InitScript initScript, ProjectConnection connection, String... tasks) {
 			this.initScript = initScript;
 			this.connection = connection;
+			this.tasks = tasks;
 		}
 
 		public ByteArrayOutputStream getStandardErr() {
@@ -97,7 +99,7 @@ public abstract class Command {
 				operation.setStandardOutput(standardOut = new ByteArrayOutputStream());
 
 				if (initScript.isNecessary())
-					operation.withArguments("--init-script", initScript.fileName());
+					operation.withArguments("--init-script", initScript.fileName(), "--info");
 			}
 
 			return operation;
@@ -106,7 +108,6 @@ public abstract class Command {
 
 	public static class ModelInvocation<T extends Model> extends Invocation {
 
-		private final String[] tasks;
 		private final Class<T> modelClass;
 
 		public ModelInvocation(
@@ -115,9 +116,8 @@ public abstract class Command {
 			ProjectConnection connection,
 			String... tasks
 		) {
-			super(initScript, connection);
+			super(initScript, connection, tasks);
 			this.modelClass = modelClass;
-			this.tasks = tasks;
 		}
 
 		public synchronized T get() {
@@ -125,8 +125,8 @@ public abstract class Command {
 				throw new IllegalStateException();
 
 			final ModelBuilder<T> builder = setup(connection.<T> model(modelClass));
-
 			invoked = true;
+			builder.forTasks(tasks);
 
 			return builder.get();
 		}
@@ -136,6 +136,10 @@ public abstract class Command {
 
 	protected void println(String message, Object... objects) {
 		System.out.printf(message + '\n', objects);
+	}
+
+	protected void println(ByteArrayOutputStream byteArrayOutputStream, Object...objects) {
+		System.out.println(new String(byteArrayOutputStream.toByteArray()));
 	}
 
 	public abstract Message execute(MCommand mCommand, ProjectConnection connection);

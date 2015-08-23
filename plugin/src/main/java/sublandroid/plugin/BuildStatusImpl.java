@@ -72,19 +72,22 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 			if (status == Status.Ok) {
 				try {
 
+					ACTION_LOGGER.info("Proxing...{}", task.getPath());
 					action.execute(task);
 				} catch (StopActionException | StopExecutionException stopException) {
 
+					ACTION_LOGGER.info("StopExcecution cause by", stopException);
 					throw stopException;
 				} catch (Throwable throwable) {
 
-					LOGGER.info("Build just invalid, action error!");
+					ACTION_LOGGER.info("Build just invalid, action error!");
 					handleActionError(task, throwable);
-					throw new StopExecutionException();
+					task.setDidWork(false);
+					throw new StopExecutionException();	
 				}
 			} else {
 
-				LOGGER.info("Build already invalid status...skipping!");
+				ACTION_LOGGER.info("Build already invalid status...skipping!");
 				throw new StopExecutionException("BuildStatus says nooooooo!");
 			}
 		}
@@ -102,7 +105,7 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 
 		@Override
 		public void contextualise(final TaskExecutionContext context) {
-			ACTION_LOGGER.debug("Setting context to {}", contextAware);
+			ACTION_LOGGER.info("Setting context to {}", contextAware);
 			contextAware.contextualise(context);
 		}
 	}
@@ -221,6 +224,7 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 					newValidators.add(new ProxyValidator(oldValidator));
 				}
 
+				// Please...
 				defTask.getValidators().clear();
 				defTask.getValidators().addAll(newValidators);
 			}
@@ -240,7 +244,6 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 			}
 
 			task.setActions(newActions);
-			// Remove validators...
 		}
 	}
 
@@ -255,10 +258,9 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 	protected void handleUnexpectedValidationError(Task task, Throwable throwable) {
 		if (status == Status.Ok) {
 			status = Status.UnexpectedValidationError;
+			error = throwable;
 			failedTask(task);
 		}
-
-		error = throwable;
 	}
 
 	protected void handleValidationErrors(Task task, List<String> messages) {
@@ -276,12 +278,12 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 		List<Action<? super Task>> newActions = new ArrayList<>(oldActions.size());
 
 		ProxyAction newAction;
-		for (Action<? super Task> action : oldActions) {
+		for (Action<? super Task> oldAction : oldActions) {
 
-			if (action instanceof ContextAwareTaskAction)
-				newAction = new ProxyActionContextAware(action, task);
+			if (oldAction instanceof ContextAwareTaskAction)
+				newAction = new ProxyActionContextAware(oldAction, task);
 			else
-				newAction = new ProxyAction(action, task);
+				newAction = new ProxyAction(oldAction, task);
 
 			newActions.add(newAction);
 		}

@@ -10,6 +10,7 @@ import java.util.regex.*;
 import org.gradle.tooling.*;
 
 import static sublandroid.core.BuildStatus.*;
+import static sublandroid.GradleUtils.searchJavaHighlights;
 
 public class CompileJava extends Command {
 
@@ -37,13 +38,15 @@ public class CompileJava extends Command {
 
     	BuildStatus buildStatus = invocation.get();
 
-    	if (buildStatus.getStatus().code() == Status.Ok.code()) {
-    		message.addFailure(null);
-    		println("Status = %s", buildStatus.getStatus().code());
-    	} else {
-    		println("Disse que não é Ok, %s", buildStatus.getStatus().code());
-    	}
+    	println("BuildStatus: %s", buildStatus.getStatus().code());
+    	println(invocation.getStandardOut());
 
+    	if (buildStatus.getStatus().code() != Status.Ok.code()) {
+    		List<MHighlight> highlights = searchJavaHighlights(invocation.getStandardErr());
+    		println(highlights.toString());
+    		if (!highlights.isEmpty())
+    			message.addFailures(highlights);
+    	}
 
     	return message;
 	}

@@ -33,7 +33,7 @@ public class CompileJavaTest {
 	}
 	
 	@Test(timeOut= 20000)
-	public void detecteSyntaxJavaErrors() throws Throwable {
+	public void detectSyntaxJavaErrors() throws Throwable {
 		try (ClientContext context = new ClientContext(JAVA_SINTAX_ERROR, 54321)) {
 			
 			send(MCommand.from("compileJava"), context.writer);
@@ -46,7 +46,7 @@ public class CompileJavaTest {
 
 			MHighlight failure = result.failures.get(0);
 
-			final String Main_java = absolutePath(JAVA_SINTAX_ERROR,"src","main","java","org","error","Main.java");
+			final String Main_java = absolutePath(JAVA_SINTAX_ERROR,"src","main","java","org","error","Maine.java");
 
 			assertThat(failure.fileName).isEqualTo(Main_java);
 			assertThat(failure.lineNumber).isEqualTo(12);
@@ -66,8 +66,8 @@ public class CompileJavaTest {
 	}
 
 	@Test(timeOut=20000)
-	public void detectedSemanticJavaErrors() throws Throwable {
-		try (ClientContext context = new ClientContext(JAVA_ERRORS_01, 12098)) {
+	public void detectSemanticJavaErrors() throws Throwable {
+		try (ClientContext context = new ClientContext(JAVA_SEMANTIC_ERROR, 12098)) {
 			send(MCommand.from("compileJava"), context.writer);
 
 			MSourceHighlights result = read(context.reader, MSourceHighlights.class);
