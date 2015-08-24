@@ -23,6 +23,7 @@ public class CompileJava extends Command {
 	protected static final Pattern ERROR_PATTERN = Pattern.compile("^([^:]+):(\\d+):\\s+([^:]+):\\s+(.+)$");
 
 	protected static final String GRADLE_TASK = "compileDebugJava";
+	protected static final String GRADLE_TASK_CLEAN = "cleanCompileDebugJava";
 
 	protected static final Pattern SEMANTIC_ERROR = Pattern.compile("^[^\\s]+\\s[^\\s]+\\sin\\sclass");
 
@@ -32,7 +33,7 @@ public class CompileJava extends Command {
 
 		final ModelInvocation<BuildStatus> invocation = Gradle.from(connection)
 		                                                 .plugins(BuildStatusPlugin.class)
-		                                                 .model(BuildStatus.class, GRADLE_TASK);
+		                                                 .model(BuildStatus.class, GRADLE_TASK_CLEAN, GRADLE_TASK);
 
     	final MSourceHighlights message = new MSourceHighlights();
 
