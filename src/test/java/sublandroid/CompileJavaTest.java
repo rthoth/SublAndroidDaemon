@@ -46,22 +46,22 @@ public class CompileJavaTest {
 
 			MHighlight failure = result.failures.get(0);
 
-			final String Main_java = absolutePath(JAVA_SINTAX_ERROR,"src","main","java","org","error","Maine.java");
+			final String Main_java = absolutePath(JAVA_SINTAX_ERROR,"src","main","java","org","error","Main.java");
 
 			assertThat(failure.fileName).isEqualTo(Main_java);
 			assertThat(failure.lineNumber).isEqualTo(12);
 			assertThat(failure.kind).isEqualTo("error");
-			assertThat(failure.what).isEqualTo("illegal start of expression");
-			assertThat(failure.where).isEqualTo("        super.onCreate(savedInstanceState,);");
+			assertThat(failure.what).isEqualTo("';' expected");
+			assertThat(failure.where).isEqualTo("        super.onCreate(savedInstanceState)");
 
-			final String App_java = absolutePath(JAVA_SINTAX_ERROR, "src", "main", "java", "com", "app", "App.java");
+			final String App_java = absolutePath(JAVA_SINTAX_ERROR, "src", "main", "java", "org", "error", "App.java");
 			failure = result.failures.get(1);
 
 			assertThat(failure.fileName).isEqualTo(App_java);
-			assertThat(failure.lineNumber).isEqualTo(7);
+			assertThat(failure.lineNumber).isEqualTo(6);
 			assertThat(failure.kind).isEqualTo("error");
-			assertThat(failure.what).isEqualTo("';' expected");
-			assertThat(failure.where).isEqualTo("		throw new RuntimeException()");
+			assertThat(failure.what).isEqualTo("illegal start of expression");
+			assertThat(failure.where).isEqualTo("		return,;");
 		}
 	}
 

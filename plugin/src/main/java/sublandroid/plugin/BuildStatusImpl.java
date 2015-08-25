@@ -24,8 +24,8 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 
 	private static final Logger ACTION_LOGGER = Logging.getLogger("sublandroid.BuildStatus.ProxyAction");
 	private static final Logger LOGGER = Logging.getLogger("sublandroid.BuildStatus");
-	private static final Logger VALIDATOR_LOGGER = Logging.getLogger("sublandroid.BuildStatus.Validator");
 	private static final String MODEL_NAME = BuildStatus.class.getName();
+	private static final Logger VALIDATOR_LOGGER = Logging.getLogger("sublandroid.BuildStatus.Validator");
 
 	public class ModelBuilder implements ToolingModelBuilder {
 
@@ -82,7 +82,6 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 
 					ACTION_LOGGER.info("Build just invalid, action error!");
 					handleActionError(task, throwable);
-					task.setDidWork(false);
 					throw new StopExecutionException();	
 				}
 			} else {
@@ -105,7 +104,7 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 
 		@Override
 		public void contextualise(final TaskExecutionContext context) {
-			ACTION_LOGGER.info("Setting context to {}", contextAware);
+			ACTION_LOGGER.debug("Setting context to {}", contextAware);
 			contextAware.contextualise(context);
 		}
 	}
@@ -162,6 +161,7 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 
 		graph.addTaskExecutionGraphListener(this);
 		graph.addTaskExecutionListener(this);
+
 	}
 
 	@Override
