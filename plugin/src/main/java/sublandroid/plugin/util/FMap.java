@@ -4,21 +4,33 @@ import java.io.*;
 
 import org.gradle.api.*;
 
+/**
+ * File "Map"
+ * 
+ */
 public class FMap {
 
+	/**
+	 * Code block "function"
+	 */
 	private interface Block<R> {
 		R apply() throws Throwable;
 	}
 
+	// where store key-values
 	protected final File baseDir;
-	protected final File buildDir;
 
 	public FMap(Project project, String baseName) {
-		buildDir = project.getBuildDir();
-		baseDir = new File(buildDir, baseName);
+		baseDir = new File(project.getBuildDir(), baseName);
 		baseDir.mkdirs();
 	}
 
+	/**
+	 * Put a key-value entry
+	 * @param  key   [description]
+	 * @param  value [description]
+	 * @return       [description]
+	 */
 	public FMap put(final String key, final String value) {
 		sync(new Block<Void>() {
 			public Void apply() throws Throwable {
@@ -62,7 +74,7 @@ public class FMap {
 			} catch (Throwable throwable) {
 				throw new RuntimeException(throwable);
 			}
-		};
+		}
 
 		return value;
 	}
