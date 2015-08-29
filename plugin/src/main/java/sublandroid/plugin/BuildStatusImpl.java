@@ -4,6 +4,7 @@ import java.util.*;
 import java.io.*;
 
 import sublandroid.core.*;
+import sublandroid.plugin.util.*;
 
 import org.gradle.api.*;
 import org.gradle.api.execution.*;
@@ -151,17 +152,25 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 
 	private String failedTaskPath = null;
 
+	public transient final FMap fMap;
+
+	private transient Task lastTask = null;
+
+	private transient final Project project;
+
 	private Status status = Status.Ok;
 
 	private List<String> tasks = new LinkedList<>();
 
 	public BuildStatusImpl(final Project project) {
+		this.project = project;
 		Gradle gradle = project.getGradle();
 		TaskExecutionGraph graph = gradle.getTaskGraph();
 
 		graph.addTaskExecutionGraphListener(this);
 		graph.addTaskExecutionListener(this);
 
+		fMap = new FMap(project, "build-status-fmap");
 	}
 
 	@Override
@@ -204,10 +213,11 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 		return status;
 	}
 
-
 	private void failedTask(Task task) {
 		failedTaskName = task.getName();
 		failedTaskPath = task.getPath();
+		
+		fMap.put(lastTask.getName(), task.getPath());
 	}
 
 	@Override
@@ -244,6 +254,7 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 			}
 
 			task.setActions(newActions);
+			lastTask = task;
 		}
 	}
 

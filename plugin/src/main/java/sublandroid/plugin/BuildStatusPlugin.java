@@ -22,6 +22,7 @@ public class BuildStatusPlugin implements Plugin<Project> {
 	@Override
 	public void apply(final Project project) {
 		final BuildStatusImpl model = new BuildStatusImpl(project);
+
 		modelBuilderRegistry.register(model.new ModelBuilder());
 	}
 }

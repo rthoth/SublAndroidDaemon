@@ -33,7 +33,7 @@ public class CompileJava extends Command {
 
 		final ModelInvocation<BuildStatus> invocation = Gradle.from(connection)
 		                                                 .plugins(BuildStatusPlugin.class)
-		                                                 .model(BuildStatus.class, GRADLE_TASK_CLEAN, GRADLE_TASK);
+		                                                 .model(BuildStatus.class, GRADLE_TASK);
 
     	final MSourceHighlights message = new MSourceHighlights();
 
