@@ -18,8 +18,6 @@ import org.gradle.api.logging.*;
 import org.gradle.api.tasks.*;
 import org.gradle.tooling.provider.model.*;
 
-import static org.apache.commons.lang.StringUtils.capitalize;
-
 /**
  * Implementation
  */
@@ -43,8 +41,6 @@ BuildStatus, TaskExecutionGraphListener, Serializable {
 	private String failedTaskPath = null;
 
 	public transient final FNote fNote;
-
-	private transient Task lastTask = null;
 
 	private transient final Project project;
 
@@ -186,25 +182,6 @@ BuildStatus, TaskExecutionGraphListener, Serializable {
 		}
 
 		errors.addAll(messages);
-	}
-
-	protected void put(Task task) {
-
-		List<Action<? super Task>> oldActions = task.getActions();
-		List<Action<? super Task>> newActions = new ArrayList<>(oldActions.size());
-
-		ProxyAction newAction;
-		for (Action<? super Task> oldAction : oldActions) {
-
-			if (oldAction instanceof ContextAwareTaskAction)
-				newAction = new ProxyActionContextAware(oldAction, task);
-			else
-				newAction = new ProxyAction(oldAction, task);
-
-			newActions.add(newAction);
-		}
-
-		task.setActions(newActions);
 	}
 
 	/**
