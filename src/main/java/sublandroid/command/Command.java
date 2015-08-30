@@ -15,6 +15,21 @@ import org.gradle.tooling.model.*;
 
 public abstract class Command {
 
+	protected static final Pattern LINE_BREAK_PATTERN = Pattern.compile("[\\r\\n]+");
+
+	protected void println(String message, Object... objects) {
+		System.out.printf(message + '\n', objects);
+	}
+
+	protected void println(ByteArrayOutputStream byteArrayOutputStream) {
+		System.out.println(new String(byteArrayOutputStream.toByteArray()));
+	}
+
+	public abstract Message execute(MCommand mCommand, ProjectConnection connection);
+	
+	/**
+	 * Gradle pre invocation
+	 */
 	public static class Gradle {
 
 		public static Gradle from(ProjectConnection connection) {
@@ -68,6 +83,9 @@ public abstract class Command {
 		}
 	}
 
+	/**
+	 * Gradle invocation
+	 */
 	public static class Invocation {
 
 		protected final ProjectConnection connection;
@@ -106,16 +124,16 @@ public abstract class Command {
 		}
 	}
 
+	/**
+	 * Gradle invocation with model
+	 */
 	public static class ModelInvocation<T extends Model> extends Invocation {
 
 		private final Class<T> modelClass;
 
-		public ModelInvocation(
-			InitScript initScript,
-			Class<T> modelClass,
-			ProjectConnection connection,
-			String... tasks
-		) {
+		public ModelInvocation(InitScript initScript, Class<T> modelClass,
+			ProjectConnection connection, String... tasks) {
+
 			super(initScript, connection, tasks);
 			this.modelClass = modelClass;
 		}
@@ -131,16 +149,4 @@ public abstract class Command {
 			return builder.get();
 		}
 	}
-
-	protected static final Pattern LINE_BREAK_PATTERN = Pattern.compile("[\\r\\n]+");
-
-	protected void println(String message, Object... objects) {
-		System.out.printf(message + '\n', objects);
-	}
-
-	protected void println(ByteArrayOutputStream byteArrayOutputStream, Object...objects) {
-		System.out.println(new String(byteArrayOutputStream.toByteArray()));
-	}
-
-	public abstract Message execute(MCommand mCommand, ProjectConnection connection);
 }
