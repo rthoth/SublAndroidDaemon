@@ -6,6 +6,7 @@ import java.io.*;
 import sublandroid.core.*;
 import sublandroid.plugin.util.*;
 
+import org.gradle.*;
 import org.gradle.api.*;
 import org.gradle.api.execution.*;
 import org.gradle.api.invocation.*;
@@ -16,6 +17,8 @@ import org.gradle.api.internal.TaskInternal;
 import org.gradle.api.logging.*;
 import org.gradle.api.tasks.*;
 import org.gradle.tooling.provider.model.*;
+
+import static org.apache.commons.lang.StringUtils.capitalize;
 
 /**
  * Implementation
@@ -58,6 +61,27 @@ BuildStatus, TaskExecutionGraphListener, Serializable {
 		//graph.addTaskExecutionListener(this);
 
 		fNote = new FNote(project, "buildstatus");
+
+		final String[] previousTasks = fNote.read();
+
+		if (previousTasks.length > 0) {
+
+			StartParameter startParameter =  project.getGradle().getStartParameter();
+
+			final List<String> newTaskNames = new ArrayList<>();
+
+			for (String previousTask : previousTasks) {
+				char[] chars = previousTask.toCharArray();
+				chars[0] = Character.toUpperCase(chars[0]);
+
+				newTaskNames.add("clean" + new String(chars));
+			}
+
+			LOGGER.info("Previous invocation error, running {}", newTaskNames);
+
+			newTaskNames.addAll(startParameter.getTaskNames());
+			startParameter.setTaskNames(newTaskNames);
+		}
 	}
 
 	@Override
@@ -93,23 +117,16 @@ BuildStatus, TaskExecutionGraphListener, Serializable {
 	private void failedTask(Task task) {
 		failedTaskName = task.getName();
 		failedTaskPath = task.getPath();
+
+		LOGGER.info("Task {} output()", task.getName(), task.getOutputs().getFiles());
 		
-		fNote.write(task.getName());
+		fNote.write(failedTaskName);
 	}
 
 	@Override
 	public void graphPopulated(final TaskExecutionGraph graph) {
 		
-		List<Task> tasks = graph.getAllTasks();
-
-		if (tasks.isEmpty())
-			return;
-
-		lastTask = tasks.get(tasks.size() - 1);
-
-		String[] previousErros = fNote.read();
-		
-		for (Task task : tasks) {
+		for (Task task : graph.getAllTasks()) {
 
 			// clean previous invocation...
 			

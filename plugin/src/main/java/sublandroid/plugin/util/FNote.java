@@ -24,11 +24,8 @@ public class FNote {
 	public FNote write(final String note) {
 		sync(new Block<Void>() {
 			public Void apply() throws Throwable {
-
 				try (RandomAccessFile randomFile = new RandomAccessFile(file, "rw")) {
-
 					long fileLength = randomFile.length();
-					System.out.println(fileLength + "kkkkkkkkkkkkkkkkkkkkk");
 					int size;
 					long seek;
 
@@ -44,7 +41,6 @@ public class FNote {
 					randomFile.writeInt(size);
 
 					randomFile.seek(seek); // end...
-
 					randomFile.writeUTF(note);
 
 					return null;
@@ -62,6 +58,10 @@ public class FNote {
 			public String[] apply() throws Throwable {
 				try (DataInputStream input = new DataInputStream(new FileInputStream(file))) {
 					int size = input.readInt();
+
+					if (size < 0)
+						throw new IllegalStateException("Illegal size");
+
 					String[] notes = new String[size];
 					for (int i=0; i<size; i++)
 						notes[i] = input.readUTF();
@@ -70,6 +70,11 @@ public class FNote {
 
 				} catch (FileNotFoundException notFoundException) {
 					return EMPTY;
+				} finally {
+					try (DataOutputStream output = new DataOutputStream(new FileOutputStream(file))) {
+						output.writeInt(0);
+						output.flush();	
+					}
 				}
 			}
 
