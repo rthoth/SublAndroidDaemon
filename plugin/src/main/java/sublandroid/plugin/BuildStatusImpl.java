@@ -152,7 +152,7 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 
 	private String failedTaskPath = null;
 
-	public transient final FMap fMap;
+	public transient final FNote fNote;
 
 	private transient Task lastTask = null;
 
@@ -170,7 +170,7 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 		graph.addTaskExecutionGraphListener(this);
 		graph.addTaskExecutionListener(this);
 
-		fMap = new FMap(project, "build-status-fmap");
+		fNote = new FNote(project, "buildstatus");
 	}
 
 	@Override
@@ -217,13 +217,26 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 		failedTaskName = task.getName();
 		failedTaskPath = task.getPath();
 		
-		fMap.put(lastTask.getName(), task.getPath());
+		fNote.write(task.getName());
 	}
 
 	@Override
 	public void graphPopulated(final TaskExecutionGraph graph) {
-		for (Task task : graph.getAllTasks()) {
+		
+		List<Task> tasks = graph.getAllTasks();
 
+		if (!tasks.isEmpty())
+			return;
+
+		lastTask = tasks.get(tasks.size() - 1);
+
+		String[] previousErros = fNote.read();
+		
+
+		for (Task task : tasks) {
+
+			// clean previous invocation...
+			
 			if (task instanceof DefaultTask) {
 				
 				final DefaultTask defTask = (DefaultTask) task;
@@ -254,7 +267,6 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 			}
 
 			task.setActions(newActions);
-			lastTask = task;
 		}
 	}
 
