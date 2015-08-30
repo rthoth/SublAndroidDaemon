@@ -28,7 +28,7 @@ public abstract class Command {
 	public abstract Message execute(MCommand mCommand, ProjectConnection connection);
 	
 	/**
-	 * Gradle pre invocation
+	 * Gradle pre-invocation
 	 */
 	public static class Gradle {
 
