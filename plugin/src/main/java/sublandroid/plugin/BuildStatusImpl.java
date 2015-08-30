@@ -266,7 +266,7 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 		}
 	}
 
-	// Argh...Something actins needs context
+	// Argh...Something actions needs context
 	private class ProxyActionContextAware extends ProxyAction implements ContextAwareTaskAction {
 
 		protected final ContextAwareTaskAction contextAware;
