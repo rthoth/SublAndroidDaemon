@@ -201,6 +201,9 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 		task.setActions(newActions);
 	}
 
+	/**
+	 * 
+	 */
 	public class ModelBuilder implements ToolingModelBuilder {
 
 		@Override
@@ -228,6 +231,9 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 		}
 	}
 
+	/**
+	 * Attempt capture anything...
+	 */
 	private class ProxyAction implements Action<Task> {
 
 		protected final Action<? super Task> action;
@@ -266,7 +272,9 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 		}
 	}
 
-	// Argh...Something actions needs context
+	/**
+	 * Argh...Something actions needs context
+	 */
 	private class ProxyActionContextAware extends ProxyAction implements ContextAwareTaskAction {
 
 		protected final ContextAwareTaskAction contextAware;
@@ -283,7 +291,9 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 		}
 	}
 
-	// Gradle validates tasks before invoke actions...
+	/**
+	 * Gradle validates tasks before invoke actions...
+	 */
 	private class ProxyValidator implements TaskValidator {
 
 		private final TaskValidator validator;
