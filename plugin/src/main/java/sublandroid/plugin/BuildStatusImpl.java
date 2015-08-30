@@ -102,14 +102,13 @@ BuildStatus, TaskExecutionGraphListener, Serializable {
 		
 		List<Task> tasks = graph.getAllTasks();
 
-		if (!tasks.isEmpty())
+		if (tasks.isEmpty())
 			return;
 
 		lastTask = tasks.get(tasks.size() - 1);
 
 		String[] previousErros = fNote.read();
 		
-
 		for (Task task : tasks) {
 
 			// clean previous invocation...

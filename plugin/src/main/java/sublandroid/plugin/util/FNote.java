@@ -10,12 +10,7 @@ import org.gradle.api.*;
  */
 public class FNote {
 
-	/**
-	 * Code block "function"
-	 */
-	private interface Block<R> {
-		R apply() throws Throwable;
-	}
+	private static final String[] EMPTY = {};
 
 	// where store notes
 	protected final File file;
@@ -72,6 +67,9 @@ public class FNote {
 						notes[i] = input.readUTF();
 
 					return notes;
+
+				} catch (FileNotFoundException notFoundException) {
+					return EMPTY;
 				}
 			}
 
@@ -96,4 +94,10 @@ public class FNote {
 		return value;
 	}
 
+	/**
+	 * Code block "function"
+	 */
+	private interface Block<R> {
+		R apply() throws Throwable;
+	}
 }
