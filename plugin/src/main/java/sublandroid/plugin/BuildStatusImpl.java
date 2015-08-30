@@ -21,7 +21,7 @@ import org.gradle.tooling.provider.model.*;
  * Implementation
  */
 public class BuildStatusImpl implements 
-BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
+BuildStatus, TaskExecutionGraphListener, Serializable {
 
 	private static final Logger ACTION_LOGGER = Logging.getLogger("sublandroid.BuildStatus.ProxyAction");
 
@@ -55,19 +55,9 @@ BuildStatus, TaskExecutionListener, TaskExecutionGraphListener, Serializable {
 		TaskExecutionGraph graph = gradle.getTaskGraph();
 
 		graph.addTaskExecutionGraphListener(this);
-		graph.addTaskExecutionListener(this);
+		//graph.addTaskExecutionListener(this);
 
 		fNote = new FNote(project, "buildstatus");
-	}
-
-	@Override
-	public void afterExecute(Task task, TaskState taskState) {
-		// NOP
-	}
-
-	@Override
-	public void beforeExecute(Task task) {
-		// NOP
 	}
 
 	@Override
