@@ -74,57 +74,52 @@ public class CompileJavaTest {
 
 			assertThat(result).isNotNull();
 			assertThat(result.failures).isNotNull();
-			assertThat(result.failures).hasSize(8);
+			assertThat(result.failures).hasSize(7);
 
-			assertFileName(result.failures.get(0), "Application.java");
-			assertFileName(result.failures.get(1), "Application.java");
-			assertFileName(result.failures.get(2), "Application.java");
-			assertFileName(result.failures.get(3), "Boot.java");
-			assertFileName(result.failures.get(4), "Boot.java");
-			assertFileName(result.failures.get(5), "Boot.java");
-			assertFileName(result.failures.get(6), "Boot.java");
-			assertFileName(result.failures.get(7), "Boot.java");
+			assertFileName(result.failures.get(0), "Main.java");
+			assertFileName(result.failures.get(1), "Main.java");
+			assertFileName(result.failures.get(2), "Main.java");
+			assertFileName(result.failures.get(3), "Main.java");
+			assertFileName(result.failures.get(4), "Some.java");
+			assertFileName(result.failures.get(5), "Some.java");
+			assertFileName(result.failures.get(6), "Some.java");
 
 
-			assertLine(result.failures.get(0), 5);
-			assertLine(result.failures.get(1), 6);
-			assertLine(result.failures.get(2), 7);
-			assertLine(result.failures.get(3), 9);
-			assertLine(result.failures.get(4), 11);
-			assertLine(result.failures.get(5), 13);
-			assertLine(result.failures.get(6), 22);
-			assertLine(result.failures.get(7), 24);
+			assertLine(result.failures.get(0), 6);
+			assertLine(result.failures.get(1), 15);
+			assertLine(result.failures.get(2), 20);
+			assertLine(result.failures.get(3), 24);
+			assertLine(result.failures.get(4), 4);
+			assertLine(result.failures.get(5), 8);
+			assertLine(result.failures.get(6), 13);
 
 			for (MHighlight highlight : result.failures) {
 				assertThat(highlight.kind).isEqualTo("error");
 			}
 
-			assertWhat(result.failures.get(0), "cannot find symbol");
-			assertWhat(result.failures.get(1), "package java.notfound does not exist");
-			assertWhat(result.failures.get(2), "package java.notfound2 does not exist");
-			assertWhat(result.failures.get(3), "method aMethod in class Application cannot be applied to given types;");
-			assertWhat(result.failures.get(4), "cannot find symbol");
-			assertWhat(result.failures.get(5), "method aMethod in class Application cannot be applied to given types;");
-			assertWhat(result.failures.get(6), "constructor Application in class Application cannot be applied to given types;");
-			assertWhat(result.failures.get(7), "method aMethod in class Application cannot be applied to given types;");
+			assertWhat(result.failures.get(0), "interface expected here");
+			assertWhat(result.failures.get(1), "cannot find symbol");
+			assertWhat(result.failures.get(2), "cannot return a value from method whose result type is void");
+			assertWhat(result.failures.get(3), "cannot find symbol");
+			assertWhat(result.failures.get(4), "missing method body, or declare abstract");
+			assertWhat(result.failures.get(5), "cannot find symbol");
+			assertWhat(result.failures.get(6), "method call in class Some cannot be applied to given types;");
 
-			assertWhere(result.failures.get(0), "import java.util.NotFoundException;");
-			assertWhere(result.failures.get(1), "import java.notfound.*;");
-			assertWhere(result.failures.get(2), "import java.notfound2.NotFoundException;");
-			assertWhere(result.failures.get(3), "		app.aMethod(\"\", 1, false);");
-			assertWhere(result.failures.get(4), "		app.hello();");
-			assertWhere(result.failures.get(5), "		app.aMethod(\"\", true);");
-			assertWhere(result.failures.get(6), "		Application app3 = new Application(true);");
-			assertWhere(result.failures.get(7), "		app3.aMethod(false, true);");
+			assertWhere(result.failures.get(0), "public class Main extends Activity implements Some");
+			assertWhere(result.failures.get(1), "        doSomethingg();");
+			assertWhere(result.failures.get(2), "    	return \"\";");
+			assertWhere(result.failures.get(3), "    	new Create();");
+			assertWhere(result.failures.get(4), "	public String doSomething();");
+			assertWhere(result.failures.get(5), "		main.onCreatee(null);");
+			assertWhere(result.failures.get(6), "		call(5);");
 
-			assertDescription(result.failures.get(0), "cannot find symbol class NotFoundException in package java.util");
-			assertDescription(result.failures.get(1), null);
+			assertDescription(result.failures.get(0), null);
+			assertDescription(result.failures.get(1), "cannot find symbol method doSomethingg() in class Main");
 			assertDescription(result.failures.get(2), null);
-			assertDescription(result.failures.get(3), "(required: String,int), (found: String,int,boolean), (reason: actual and formal argument lists differ in length)");
-			assertDescription(result.failures.get(4), "cannot find symbol method hello() in variable app of type Application");
-			assertDescription(result.failures.get(5), "(required: String,int), (found: String,boolean), (reason: actual argument boolean cannot be converted to int by method invocation conversion)");
-			assertDescription(result.failures.get(6), "(required: no arguments), (found: boolean), (reason: actual and formal argument lists differ in length)");
-			assertDescription(result.failures.get(7), "(required: String,int), (found: boolean,boolean), (reason: actual argument boolean cannot be converted to String by method invocation conversion)");
+			assertDescription(result.failures.get(3), "cannot find symbol class Create in class Main");
+			assertDescription(result.failures.get(4), null);
+			assertDescription(result.failures.get(5), "cannot find symbol method onCreatee(<null>) in variable main of type Main");
+			assertDescription(result.failures.get(6), "(required: no arguments), (found: int), (reason: actual and formal argument lists differ in length)");
 		}
 	}
 }

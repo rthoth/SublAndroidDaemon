@@ -54,7 +54,7 @@ public class GradleUtils {
 				
 				i++;
 
-				if (CANNOT_FIND_SYMBOL == highlight.what)
+				if (CANNOT_FIND_SYMBOL.equals(highlight.what))
 					i += javaCannotFindSymbol(highlight, i, lines);
 
 				else if (JAVA_SEMANTIC_ERROR.matcher(highlight.what).find())
