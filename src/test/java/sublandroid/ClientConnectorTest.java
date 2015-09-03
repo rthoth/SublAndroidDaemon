@@ -24,6 +24,8 @@ public class ClientConnectorTest {
 
 			MHello hello = client.read(MHello.class);
 
+
+			assertThat(hello).isNotNull();
 			assertThat(hello.message).isEqualTo("Woohoo!");
 		}
 	}
