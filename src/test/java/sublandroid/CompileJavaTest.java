@@ -8,30 +8,11 @@ import org.testng.annotations.*;
 
 import static org.assertj.core.api.Assertions.*;
 import static sublandroid.help.Helper.*;
+import static sublandroid.help.MHighlightHelper.*;
 import static sublandroid.Path.*;
 
 public class CompileJavaTest {
 
-	public void assertFileName(MHighlight highlight, String fileName) {
-		assertThat(highlight.fileName).endsWith(fileName);
-	}
-
-	public void assertLine(MHighlight highlight, int line) {
-		assertThat(highlight.lineNumber).isEqualTo(line);
-	}
-
-	public void assertWhat(MHighlight highlight, String what) {
-		assertThat(highlight.what).isEqualTo(what);
-	}
-
-	public void assertWhere(MHighlight highlight, String where) {
-		assertThat(highlight.where).isEqualTo(where);
-	}
-
-	public void assertDescription(MHighlight highlight, String description) {
-		assertThat(highlight.description).isEqualTo(description);
-	}
-	
 	@Test(timeOut= 20000)
 	public void detectSyntaxJavaErrors() throws Throwable {
 		try (Client client = new Client(JAVA_SINTAX_ERROR, 54321)) {
