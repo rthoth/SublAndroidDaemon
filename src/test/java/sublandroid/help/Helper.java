@@ -6,6 +6,7 @@ import sublandroid.messages.*;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 import com.alibaba.fastjson.TypeReference;
 
@@ -22,6 +23,37 @@ public abstract class Helper {
 		public CommandFailed(Object object) {
 			super(object.toString());
 		}
+	}
+
+	private static interface F<T> {
+
+		public T apply(String json);
+
+	}
+
+	private static class FClazz<T> implements F<T> {
+
+		private final Class<T> clazz;
+		
+		public FClazz(Class<T> clazz) {
+			this.clazz = clazz;
+		}
+
+		@Override
+		public T apply(String json) { return parseObject(json, clazz); }
+	}
+
+	private static class FTypeRef<T> implements F<T> {
+
+		private final TypeReference<T> typeReference;
+
+		public FTypeRef(TypeReference<T> typeReference) {
+			this.typeReference = typeReference;
+		}
+
+		@Override
+		public T apply(String json) { return parseObject(json, typeReference); }
+
 	}
 
 	public static class Client implements AutoCloseable {
@@ -72,35 +104,26 @@ public abstract class Helper {
 		}
 
 		public <T> T read(Class<T> clazz) throws IOException {
-			final String line = reader.readLine();
-			System.err.println(line);
-			final char status = line.charAt(0);
-
-			switch(status) {
-				case 'S':
-					return parseObject(line.substring(1), clazz);
-
-				case 'E':
-					throw new CommandFailed(parseObject(line.substring(1), MFailure.class));
-
-				default:
-					throw new IllegalStateException(String.valueOf(status));
-			}
+			return read(new FClazz<T>(clazz));
 		}
 
 		public <T> T read(TypeReference<T> type) throws IOException {
+			return read(new FTypeRef<T>(type));
+		}
+
+		private <T> T read(F<T> f) throws IOException {
+
 			final String line = reader.readLine();
 			System.err.println(line);
 			
 			final char status = line.charAt(0);
-			final T object = parseObject(line.substring(1), type);
 
 			switch(status) {
 				case 'S':
-					return object;
+					return f.apply(line.substring(1));
 
 				case 'E':
-					throw new CommandFailed(object);
+					throw new CommandFailed(parseObject(line.substring(1), MFailure.class));
 
 				default:
 					throw new IllegalStateException(String.valueOf(status));
