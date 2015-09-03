@@ -1,8 +1,9 @@
 package sublandroid;
 
 import sublandroid.messages.*;
+
 import static sublandroid.Path.*;
-import static sublandroid.Util.*;
+import static sublandroid.help.Helper.*;
 
 import java.io.*;
 
@@ -17,11 +18,11 @@ public class ClientConnectorTest {
 
 	@Test(timeOut=10000)
 	public void helloCommand() throws Throwable {
-		try (ClientContext context = new ClientContext(PROJECT_01, 12345)) {
+		try (Client client = new Client(PROJECT_01, 12345)) {
 
-			send(MCommand.from("hello"), context.writer);
+			client.send(MCommand.from("hello"));
 
-			MHello hello = read(context.reader, MHello.class);
+			MHello hello = client.read(MHello.class);
 
 			assertThat(hello.message).isEqualTo("Woohoo!");
 		}
@@ -30,11 +31,11 @@ public class ClientConnectorTest {
 
 	@Test(timeOut=5000, expectedExceptions=CommandFailed.class)
 	public void unknowCommand() throws Throwable {
-		try(ClientContext context = new ClientContext(PROJECT_01, 12346)) {
+		try(Client client = new Client(PROJECT_01, 12346)) {
 
-			send(MCommand.from("unknowCommand"), context.writer);
+			client.send(MCommand.from("unknowCommand"));
 
-			read(context.reader, Object.class);
+			client.read(Object.class);
 		}
 	}
 

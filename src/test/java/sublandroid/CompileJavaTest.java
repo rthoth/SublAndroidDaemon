@@ -7,7 +7,7 @@ import java.io.*;
 import org.testng.annotations.*;
 
 import static org.assertj.core.api.Assertions.*;
-import static sublandroid.Util.*;
+import static sublandroid.help.Helper.*;
 import static sublandroid.Path.*;
 
 public class CompileJavaTest {
@@ -34,11 +34,11 @@ public class CompileJavaTest {
 	
 	@Test(timeOut= 20000)
 	public void detectSyntaxJavaErrors() throws Throwable {
-		try (ClientContext context = new ClientContext(JAVA_SINTAX_ERROR, 54321)) {
+		try (Client client = new Client(JAVA_SINTAX_ERROR, 54321)) {
 			
-			send(MCommand.from("compileJava"), context.writer);
+			client.send(MCommand.from("compileJava"));
 
-			MSourceHighlights result = read(context.reader, MSourceHighlights.class);
+			MSourceHighlights result = client.read(MSourceHighlights.class);
 
 			assertThat(result).isNotNull();
 			assertThat(result.failures).isNotNull();
@@ -67,10 +67,10 @@ public class CompileJavaTest {
 
 	@Test(timeOut=20000)
 	public void detectSemanticJavaErrors() throws Throwable {
-		try (ClientContext context = new ClientContext(JAVA_SEMANTIC_ERROR, 12098)) {
-			send(MCommand.from("compileJava"), context.writer);
+		try (Client client = new Client(JAVA_SEMANTIC_ERROR, 12098)) {
+			client.send(MCommand.from("compileJava"));
 
-			MSourceHighlights result = read(context.reader, MSourceHighlights.class);
+			MSourceHighlights result = client.read(MSourceHighlights.class);
 
 			assertThat(result).isNotNull();
 			assertThat(result.failures).isNotNull();
