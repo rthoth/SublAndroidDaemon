@@ -128,7 +128,7 @@ public abstract class Command {
 	 * Gradle invocation with model
 	 */
 	public static class ModelInvocation<T extends Model> extends Invocation {
-
+		
 		private final Class<T> modelClass;
 		private T model;
 

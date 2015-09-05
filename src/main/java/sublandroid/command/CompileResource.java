@@ -13,7 +13,7 @@ import org.gradle.tooling.*;
 import org.gradle.tooling.model.*;
 import org.gradle.api.tasks.*;
 
-import static sublandroid.GradleUtils.searchXmlHighlights;
+import static sublandroid.utils.Xml.searchXmlHighlights;
 
 public class CompileResource extends Command {
 

@@ -10,7 +10,7 @@ import java.util.regex.*;
 import org.gradle.tooling.*;
 
 import static sublandroid.core.BuildStatus.*;
-import static sublandroid.GradleUtils.searchJavaHighlights;
+import static sublandroid.utils.Java.searchJavaHighlights;
 
 public class CompileJava extends Command {
 

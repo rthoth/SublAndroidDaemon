@@ -1,4 +1,4 @@
-package sublandroid;
+package sublandroid.utils;
 
 import sublandroid.command.Command;
 import sublandroid.core.BuildStatus;
@@ -8,7 +8,7 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 
-public class GradleUtils {
+public abstract class Java extends Source {
 
 	public static class JavaHighlight extends MHighlight {
 		public JavaHighlight() {
@@ -18,15 +18,9 @@ public class GradleUtils {
 
 	protected static final String CANNOT_FIND_SYMBOL = "cannot find symbol";
 
-	protected static final Pattern NL_PATTERN = Pattern.compile("[\\r\\n]+");
-
 	protected static final Pattern JAVA_FILE_ERROR_PATTERN = Pattern.compile("^([^:]+):(\\d+):\\s+([^:]+):\\s+(.+)$");
 	protected static final Pattern JAVA_DETAIL_PATTERN = Pattern.compile("^\\W*([^:]+):\\s+(.+)$");
 	protected static final Pattern JAVA_SEMANTIC_ERROR = Pattern.compile("^[^\\s]+\\s[^\\s]+\\sin\\sclass");
-
-	private GradleUtils() {
-
-	}
 
 	public static List<MHighlight> searchJavaHighlights(ByteArrayOutputStream byteArrayOutputStream) {
 		return searchJavaHighlights(new String(byteArrayOutputStream.toByteArray()));
@@ -65,20 +59,6 @@ public class GradleUtils {
 		}
 
 		return highlights;
-	}
-
-	public static List<MHighlight> searchXmlHighlights(final Command.ModelInvocation<BuildStatus> modelInvocation) {
-		final ByteArrayOutputStream outputStream = modelInvocation.getStandardErr();
-		final String[] lines = NL_PATTERN.split(new String(outputStream.toByteArray()));
-
-		return searchXmlHighlights(modelInvocation, lines);
-	}
-
-	public static List<MHighlight> searchXmlHighlights(
-	 Command.ModelInvocation<BuildStatus> modelInvocation, final String... lines)  {
-
-
-		return null;
 	}
 
 	private static int javaCannotFindSymbol(final MHighlight highlight, int line, String[] lines) {
