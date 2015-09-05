@@ -22,15 +22,19 @@ public abstract class Java extends Source {
 	protected static final Pattern JAVA_DETAIL_PATTERN = Pattern.compile("^\\W*([^:]+):\\s+(.+)$");
 	protected static final Pattern JAVA_SEMANTIC_ERROR = Pattern.compile("^[^\\s]+\\s[^\\s]+\\sin\\sclass");
 
-	public static List<MHighlight> searchJavaHighlights(ByteArrayOutputStream byteArrayOutputStream) {
+	public static List<MHighlight> searchJavaHighlights(Command.ModelInvocation<BuildStatus> modelInvocation) {
+		return searchJavaHighlights(modelInvocation.getStandardErr());
+	}
+
+	private static List<MHighlight> searchJavaHighlights(ByteArrayOutputStream byteArrayOutputStream) {
 		return searchJavaHighlights(new String(byteArrayOutputStream.toByteArray()));
 	}
 
-	public static List<MHighlight> searchJavaHighlights(String output) {
+	private static List<MHighlight> searchJavaHighlights(String output) {
 		return searchJavaHighlights(NL_PATTERN.split(output));
 	}
 
-	public static List<MHighlight> searchJavaHighlights(String... lines) {
+	private static List<MHighlight> searchJavaHighlights(String... lines) {
 		LinkedList<MHighlight> highlights = new LinkedList<>();
 
 		for (int i=0; i<lines.length; i++) {

@@ -7,6 +7,9 @@ import sublandroid.command.Command;
 import sublandroid.core.*;
 import sublandroid.messages.*;
 
+/**
+ * Process any Android XML results
+ */
 public abstract class Xml extends Source {
 
 	public static List<MHighlight> searchXmlHighlights(final Command.ModelInvocation<BuildStatus> modelInvocation) {

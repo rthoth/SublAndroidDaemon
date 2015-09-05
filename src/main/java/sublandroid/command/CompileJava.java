@@ -32,7 +32,7 @@ public class CompileJava extends Command {
 
 		if (buildStatus.getStatus().code() != Status.Ok.code()) {
 
-			List<MHighlight> highlights = searchJavaHighlights(invocation.getStandardErr());
+			List<MHighlight> highlights = searchJavaHighlights(invocation);
 
 			if (!highlights.isEmpty())
 				message.addFailures(highlights);
