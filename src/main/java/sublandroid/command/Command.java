@@ -130,6 +130,7 @@ public abstract class Command {
 	public static class ModelInvocation<T extends Model> extends Invocation {
 
 		private final Class<T> modelClass;
+		private T model;
 
 		public ModelInvocation(InitScript initScript, Class<T> modelClass,
 			ProjectConnection connection, String... tasks) {
@@ -140,13 +141,14 @@ public abstract class Command {
 
 		public synchronized T get() {
 			if (invoked)
-				throw new IllegalStateException();
+				return model;
+			else {
+				final ModelBuilder<T> builder = setup(connection.<T> model(modelClass));
+				invoked = true;
+				builder.forTasks(tasks);
 
-			final ModelBuilder<T> builder = setup(connection.<T> model(modelClass));
-			invoked = true;
-			builder.forTasks(tasks);
-
-			return builder.get();
+				return model = builder.get();
+			}
 		}
 	}
 }

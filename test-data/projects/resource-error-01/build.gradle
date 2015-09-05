@@ -6,16 +6,10 @@ buildscript {
         classpath 'com.android.tools.build:gradle:1.2.3'
     }
 }
+
 apply plugin: 'android'
 
 android {
     compileSdkVersion 'android-22'
-    buildToolsVersion '23.0.0'
-
-    buildTypes {
-        release {
-            runProguard false
-            proguardFile getDefaultProguardFile('proguard-android.txt')
-        }
-    }
+    buildToolsVersion '22.0.1'
 }

@@ -22,23 +22,22 @@ public class CompileJava extends Command {
 	public Message execute(MCommand mCommand, ProjectConnection connection)	{
 
 		final ModelInvocation<BuildStatus> invocation = Gradle.from(connection)
-		                                                 .plugins(BuildStatusPlugin.class)
-		                                                 .model(BuildStatus.class, GRADLE_TASK);
+		 .plugins(BuildStatusPlugin.class).model(BuildStatus.class, GRADLE_TASK);
 
-    	final MSourceHighlights message = new MSourceHighlights();
+		final MSourceHighlights message = new MSourceHighlights();
 
-    	BuildStatus buildStatus = invocation.get();
+		BuildStatus buildStatus = invocation.get();
 
-    	println("BuildStatus: %s", buildStatus.getStatus().code());
-    	println(invocation.getStandardOut());
+		println("BuildStatus: %s", buildStatus.getStatus().code());
 
-    	if (buildStatus.getStatus().code() != Status.Ok.code()) {
-    		List<MHighlight> highlights = searchJavaHighlights(invocation.getStandardErr());
-    		println(highlights.toString());
-    		if (!highlights.isEmpty())
-    			message.addFailures(highlights);
-    	}
+		if (buildStatus.getStatus().code() != Status.Ok.code()) {
 
-    	return message;
+			List<MHighlight> highlights = searchJavaHighlights(invocation.getStandardErr());
+
+			if (!highlights.isEmpty())
+				message.addFailures(highlights);
+		}
+
+		return message;
 	}
 }

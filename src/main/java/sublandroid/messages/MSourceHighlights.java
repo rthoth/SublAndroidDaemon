@@ -23,7 +23,7 @@ public class MSourceHighlights extends Message {
 
 	public MSourceHighlights addFailures(final Collection<MHighlight> failures) {
 		if (this.failures == null)
-			this.failures = new ArrayList<>(failures);
+			this.failures = new LinkedList<>(failures);
 		else
 			this.failures.addAll(failures);
 

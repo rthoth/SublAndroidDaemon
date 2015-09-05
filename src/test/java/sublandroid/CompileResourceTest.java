@@ -22,6 +22,9 @@ public class CompileResourceTest {
 			/*MResourceCompile resourceCompile = read(client.reader, MResourceCompile.class);
 
 			assertThat(resourceCompile).isNotNull();*/
+
+			MSourceHighlights resourceCompile = client.read(MSourceHighlights.class);
+			assertThat(resourceCompile).isNotNull();
 		}
 	}
 

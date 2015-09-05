@@ -1,5 +1,7 @@
 package sublandroid;
 
+import sublandroid.command.Command;
+import sublandroid.core.BuildStatus;
 import sublandroid.messages.*;
 
 import java.io.*;
@@ -63,6 +65,20 @@ public class GradleUtils {
 		}
 
 		return highlights;
+	}
+
+	public static List<MHighlight> searchXmlHighlights(final Command.ModelInvocation<BuildStatus> modelInvocation) {
+		final ByteArrayOutputStream outputStream = modelInvocation.getStandardErr();
+		final String[] lines = NL_PATTERN.split(new String(outputStream.toByteArray()));
+
+		return searchXmlHighlights(modelInvocation, lines);
+	}
+
+	public static List<MHighlight> searchXmlHighlights(
+	 Command.ModelInvocation<BuildStatus> modelInvocation, final String... lines)  {
+
+
+		return null;
 	}
 
 	private static int javaCannotFindSymbol(final MHighlight highlight, int line, String[] lines) {

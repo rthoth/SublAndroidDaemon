@@ -27,9 +27,7 @@ public interface BuildStatus extends Model  {
 			public String code() { return "ValidationError"; }
 		};
 
-
 		String code();
-
 	}
 	
 	public Throwable getError();
