@@ -8,6 +8,7 @@ import org.gradle.tooling.*;
 
 import org.testng.annotations.*;
 
+import static sublandroid.core.BuildStatus.Error;
 import static sublandroid.plugin.TestHelpers.*;
 import static org.assertj.core.api.Assertions.*;
 
@@ -28,14 +29,14 @@ public class BuildStatusPluginTest {
 		assertThat(catchException.getStatus().code()).isEqualTo("ActionError");
 		assertThat(catchException.getFailedTaskName()).isEqualTo("compileDebugJava");
 
-		Throwable error = catchException.getError();
+		Error error = catchException.getError();
 		assertThat(error).isNotNull();
 
-		for (Throwable cause = error; cause != null; cause = cause.getCause()) {
+		for (Error cause = error; cause != null; cause = cause.getCause()) {
 			System.out.println("--------\n" + cause.getMessage() + "\n--------");
 		}
 
-		error.printStackTrace();
+		// error.printStackTrace();
 	}
 
 	@Test
@@ -48,21 +49,19 @@ public class BuildStatusPluginTest {
 
 		t3 = ctx.model(BuildStatus.class, "clean", "check");
 
-		BuildStatus catchException = t3.a.get();
+		BuildStatus buildStatus = t3.a.get();
 
-		assertThat(catchException.getStatus()).isNotNull();
-		assertThat(catchException.getStatus().code()).isEqualTo("ActionError");
-		assertThat(catchException.getFailedTaskName()).isEqualTo("processDebugResources");
+		assertThat(buildStatus.getStatus()).isNotNull();
+		assertThat(buildStatus.getStatus().code()).isEqualTo("ActionError");
+		assertThat(buildStatus.getFailedTaskName()).isEqualTo("processDebugResources");
 
-		Throwable cause = catchException.getError();
+		Error cause = buildStatus.getError();
 
 		assertThat(cause).isNotNull();
 
 		for (; cause != null; cause = cause.getCause()) {
 			System.out.println("-------\n" + cause.getMessage() + "\n------");
 		}
-
-		catchException.getError().printStackTrace();
 	}
 
 }

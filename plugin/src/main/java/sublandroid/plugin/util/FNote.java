@@ -64,13 +64,16 @@ public class FNote {
 
 					String[] notes = new String[size];
 					for (int i=0; i<size; i++)
-						notes[i] = input.readUTF();
+						notes[i] = input.readUTF();	
 
 					return notes;
 
 				} catch (FileNotFoundException notFoundException) {
+
 					return EMPTY;
+
 				} finally {
+
 					try (DataOutputStream output = new DataOutputStream(new FileOutputStream(file))) {
 						output.writeInt(0);
 						output.flush();	

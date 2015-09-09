@@ -13,17 +13,10 @@ import org.gradle.api.*;
 import org.gradle.tooling.*;
 import org.gradle.tooling.model.*;
 
+
 public abstract class Command {
 
 	protected static final Pattern LINE_BREAK_PATTERN = Pattern.compile("[\\r\\n]+");
-
-	protected void println(String message, Object... objects) {
-		System.out.printf(message + '\n', objects);
-	}
-
-	protected void println(ByteArrayOutputStream byteArrayOutputStream) {
-		System.out.println(new String(byteArrayOutputStream.toByteArray()));
-	}
 
 	public abstract Message execute(MCommand mCommand, ProjectConnection connection);
 	

@@ -7,6 +7,9 @@ import sublandroid.command.Command;
 import sublandroid.core.*;
 import sublandroid.messages.*;
 
+import static sublandroid.Log.*;
+import static sublandroid.core.BuildStatus.Error;
+
 /**
  * Process any Android XML results
  */
@@ -22,7 +25,14 @@ public abstract class Xml extends Source {
 	public static List<MHighlight> searchXmlHighlights(
 	 Command.ModelInvocation<BuildStatus> modelInvocation, final String... lines)  {
 
+		BuildStatus buildStatus = modelInvocation.get();
 
-		return null;
+		List<MHighlight> errors = new LinkedList<>();
+
+		if (buildStatus.getStatus().code() != BuildStatus.Status.Ok.code()) {
+			println(modelInvocation.getStandardErr());
+		}
+
+		return errors;
 	}
 }

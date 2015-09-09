@@ -33,9 +33,8 @@ public class CompileResourceTest {
 		try (Client client = new Client(RESOURCE_ERROR_01, 3455)) {
 			client.send(MCommand.from("compileResource"));
 
-			/*MResourceCompile resourceCompile = read(client.reader, MResourceCompile.class);
-
-			assertThat(resourceCompile.failures).hasSize(2);*/
+			MSourceHighlights highlights = client.read(MSourceHighlights.class);
+			assertThat(highlights).isNotNull();
 		}
 	}
 

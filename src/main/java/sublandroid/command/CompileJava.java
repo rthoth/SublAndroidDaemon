@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.regex.*;
 import org.gradle.tooling.*;
 
+import static sublandroid.Log.*;
 import static sublandroid.core.BuildStatus.*;
 import static sublandroid.utils.Java.searchJavaHighlights;
 

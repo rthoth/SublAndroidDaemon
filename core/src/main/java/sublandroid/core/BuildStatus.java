@@ -9,6 +9,17 @@ import org.gradle.tooling.model.*;
  */
 public interface BuildStatus extends Model  {
 
+	static interface Error extends java.io.Serializable {
+
+		Error getCause();
+
+		String getMessage();
+
+		StackTraceElement[] getStackTrace();
+
+		String getType();
+	}
+
 	public static interface Status extends java.io.Serializable {
 
 		static final Status ActionError = new Status() {
@@ -30,7 +41,7 @@ public interface BuildStatus extends Model  {
 		String code();
 	}
 	
-	public Throwable getError();
+	public Error getError();
 
 	public List<String> getErrors();
 

@@ -32,7 +32,7 @@ BuildStatus, TaskExecutionGraphListener, Serializable {
 
 	private static final Logger VALIDATOR_LOGGER = Logging.getLogger("sublandroid.BuildStatus.Validator");
 
-	private Throwable error = null;
+	private Error error = null;
 
 	private List<String> errors = new LinkedList<>();
 
@@ -81,7 +81,7 @@ BuildStatus, TaskExecutionGraphListener, Serializable {
 	}
 
 	@Override
-	public Throwable getError() {
+	public Error getError() {
 		return error;
 	}
 
@@ -162,7 +162,7 @@ BuildStatus, TaskExecutionGraphListener, Serializable {
 	protected void handleActionError(Task task, Throwable throwable) {
 		if (status == Status.Ok) {
 			status = Status.ActionError;
-			error = throwable;
+			error = new ErrorImpl(throwable);
 			failedTask(task);
 		}
 	}
@@ -170,7 +170,7 @@ BuildStatus, TaskExecutionGraphListener, Serializable {
 	protected void handleUnexpectedValidationError(Task task, Throwable throwable) {
 		if (status == Status.Ok) {
 			status = Status.UnexpectedValidationError;
-			error = throwable;
+			error = new ErrorImpl(throwable);
 			failedTask(task);
 		}
 	}
@@ -182,6 +182,37 @@ BuildStatus, TaskExecutionGraphListener, Serializable {
 		}
 
 		errors.addAll(messages);
+	}
+
+	private static class ErrorImpl implements Error {
+
+		private ErrorImpl cause;
+		private String message;
+		private StackTraceElement[] stackTrace;
+		private String type;
+
+		public ErrorImpl(Throwable throwable) {
+			if (throwable.getCause() != null)
+				cause = new ErrorImpl(throwable.getCause());
+
+			message = throwable.getMessage();
+			type = throwable.getClass().getName();
+			stackTrace = throwable.getStackTrace();
+
+		}
+
+		@Override
+		public Error getCause() { return cause; }
+
+		@Override
+		public String getMessage() { return message; }
+
+		@Override
+		public StackTraceElement[] getStackTrace() { return stackTrace; }
+
+		@Override
+		public String getType() { return type; }
+
 	}
 
 	/**

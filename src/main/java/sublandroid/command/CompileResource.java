@@ -5,6 +5,7 @@ import java.nio.file.*;
 import java.util.regex.*;
 import java.util.*;
 
+import sublandroid.Log;
 import sublandroid.core.*;
 import sublandroid.messages.*;
 import sublandroid.plugin.*;
@@ -13,6 +14,7 @@ import org.gradle.tooling.*;
 import org.gradle.tooling.model.*;
 import org.gradle.api.tasks.*;
 
+import sublandroid.core.BuildStatus.Error;
 import static sublandroid.utils.Xml.searchXmlHighlights;
 
 public class CompileResource extends Command {
@@ -29,12 +31,17 @@ public class CompileResource extends Command {
 		final MSourceHighlights message = new MSourceHighlights();
 		BuildStatus buildStatus = invocation.get();
 
-		println("BuildStatus: %s", buildStatus.getStatus().code());
+		Log.println("BuildStatus: %s", buildStatus.getStatus().code());
+
+		//println(invocation.getStandardOut());
 
 		if (buildStatus.getStatus().code() != BuildStatus.Status.Ok.code()) {
+
+			//Log.println(buildStatus.getError());
+
 			List<MHighlight> highlights = searchXmlHighlights(invocation);
 
-			if (!highlights.isEmpty())
+			if (highlights != null && !highlights.isEmpty())
 				message.addFailures(highlights);
 		}
 
