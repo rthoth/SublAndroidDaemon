@@ -110,7 +110,7 @@ public abstract class Command {
 				operation.setStandardOutput(standardOut = new ByteArrayOutputStream());
 
 				if (initScript.isNecessary())
-					operation.withArguments("--init-script", initScript.fileName(), "--info");
+					operation.withArguments("--init-script", initScript.fileName());
 			}
 
 			return operation;

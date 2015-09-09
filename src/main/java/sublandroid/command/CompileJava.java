@@ -33,10 +33,8 @@ public class CompileJava extends Command {
 
 		if (buildStatus.getStatus().code() != Status.Ok.code()) {
 
-			List<MHighlight> highlights = searchJavaHighlights(invocation);
-
-			if (!highlights.isEmpty())
-				message.addFailures(highlights);
+			List<MHighlight> highlights = new InvocationReader(invocation)
+			                               .read(new XmlOutputReader(), new JavaOutputReader());
 		}
 
 		return message;
