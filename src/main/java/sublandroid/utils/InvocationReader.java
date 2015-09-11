@@ -16,7 +16,6 @@ public class InvocationReader<I extends Invocation> {
 		this.invocation = invocation;
 	}
 
-
 	public List<MHighlight> read(final OutputReader reader, OutputReader... readers) {
 
 		ArrayList<OutputReader> outputReaders = new ArrayList<>(readers.length + 1);
