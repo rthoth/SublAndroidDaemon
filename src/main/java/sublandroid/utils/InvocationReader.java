@@ -37,16 +37,30 @@ public class InvocationReader<I extends Invocation> {
 
 		for (int lineNumber = 1; line != null; lineNumber++) {
 			for (OutputReader outputReader : outputReaders)
-				highlights.addAll(outputReader.errorLine(lineNumber, line));
+				try {
+					highlights.addAll(outputReader.errorLine(lineNumber, line));
+				} catch (Throwable throwable) {
+					throw new InvocationReaderException(
+						String.format("OutputReader %s failed at %d", outputReader, lineNumber),
+						throwable);
+				}
 
 			try {
 				line = bufferedReader.readLine();
 			} catch (IOException ioException) {
-				throw new RuntimeException(ioException);
+				throw new InvocationReaderException("Error in line " + (lineNumber + 1), ioException);
 			}
 		}
 
 		return highlights;
+	}
+
+
+	public static class InvocationReaderException extends RuntimeException {
+
+		public InvocationReaderException(String message, Throwable cause) {
+			super(message, cause);
+		}
 	}
 
 }

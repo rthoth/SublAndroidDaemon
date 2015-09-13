@@ -11,4 +11,8 @@ public class XmlOutputReader extends OutputReader {
 		return null;
 	}
 
+	@Override public String toString() {
+		return "XmlOutputReader";
+	}
+
 }
