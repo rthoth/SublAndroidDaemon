@@ -96,6 +96,14 @@ public abstract class Command {
 			this.tasks = tasks;
 		}
 
+		public InputStream getErr() {
+			return new ByteArrayInputStream(standardErr.toByteArray());
+		}
+
+		public InputStream getOut() {
+			return new ByteArrayInputStream(standardOut.toByteArray());
+		}
+
 		public ByteArrayOutputStream getStandardErr() {
 			return standardErr;
 		}
