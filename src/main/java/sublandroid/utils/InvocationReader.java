@@ -3,6 +3,7 @@ package sublandroid.utils;
 import java.util.*;
 import java.io.*;
 
+import sublandroid.Log;
 import sublandroid.command.Command.Invocation;
 import sublandroid.messages.MHighlight;
 
@@ -19,13 +20,17 @@ public class InvocationReader<I extends Invocation> {
 		LinkedList<MHighlight> highlights = new LinkedList<>();
 		ArrayList<OutputReader> outputReaders = new ArrayList<>(readers.length + 1);
 
-		outputReaders.add(reader);
+		if (reader.apply(invocation))
+			outputReaders.add(reader);
 
-		for (OutputReader outputReader : readers)
-			outputReaders.add(outputReader);
+		for (OutputReader outputReader : readers) {
+			if (outputReader.apply(invocation))
+				outputReaders.add(outputReader);
+		}
 
-		InputStreamReader inputStreamReader = new InputStreamReader(invocation.getErr());
-		BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+		BufferedReader bufferedReader = new BufferedReader(
+			new InputStreamReader(invocation.getErr())
+		);
 
 		String line;
 
@@ -35,20 +40,37 @@ public class InvocationReader<I extends Invocation> {
 			throw new RuntimeException(ioException);
 		}
 
-		for (int lineNumber = 1; line != null; lineNumber++) {
+		List<MHighlight> currentHighlights;
+
+		for (OutputReader outputReader : readers) {
+			if (outputReader.hasError()) {
+				currentHighlights = outputReader.lastHighlights();
+				if (currentHighlights != null)
+					highlights.addAll(currentHighlights);
+			}
+		}
+		for (int number = 1; line != null; number++) {
 			for (OutputReader outputReader : outputReaders)
+
 				try {
-					highlights.addAll(outputReader.errorLine(lineNumber, line));
+
+					outputReader.errorLine(number, line);
+					if (outputReader.hasError()) {
+						currentHighlights = outputReader.lastHighlights();
+						if (currentHighlights != null)
+							highlights.addAll(currentHighlights);
+					}
+
 				} catch (Throwable throwable) {
 					throw new InvocationReaderException(
-						String.format("OutputReader %s failed at %d", outputReader, lineNumber),
+						String.format("OutputReader %s failed at %d", outputReader, number),
 						throwable);
 				}
 
 			try {
 				line = bufferedReader.readLine();
 			} catch (IOException ioException) {
-				throw new InvocationReaderException("Error in line " + (lineNumber + 1), ioException);
+				throw new InvocationReaderException("Error in line " + (number + 1), ioException);
 			}
 		}
 

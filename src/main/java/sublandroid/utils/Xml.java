@@ -16,8 +16,7 @@ import static sublandroid.core.BuildStatus.Error;
 public abstract class Xml extends Source {
 
 	public static List<MHighlight> searchXmlHighlights(final Command.ModelInvocation<BuildStatus> modelInvocation) {
-		final ByteArrayOutputStream outputStream = modelInvocation.getStandardErr();
-		final String[] lines = NL_PATTERN.split(new String(outputStream.toByteArray()));
+		final String[] lines = NL_PATTERN.split(modelInvocation.getErrString());
 
 		return searchXmlHighlights(modelInvocation, lines);
 	}
@@ -30,7 +29,7 @@ public abstract class Xml extends Source {
 		List<MHighlight> errors = new LinkedList<>();
 
 		if (buildStatus.getStatus().code() != BuildStatus.Status.Ok.code()) {
-			println(modelInvocation.getStandardErr());
+			println(modelInvocation.getErrString());
 		}
 
 		return errors;

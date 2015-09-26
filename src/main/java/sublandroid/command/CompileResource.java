@@ -1,14 +1,15 @@
 package sublandroid.command;
 
-import java.io.*;
-import java.nio.file.*;
-import java.util.regex.*;
-import java.util.*;
-
 import sublandroid.Log;
 import sublandroid.core.*;
 import sublandroid.messages.*;
 import sublandroid.plugin.*;
+import sublandroid.utils.*;
+
+import java.io.*;
+import java.nio.file.*;
+import java.util.regex.*;
+import java.util.*;
 
 import org.gradle.tooling.*;
 import org.gradle.tooling.model.*;
@@ -31,18 +32,14 @@ public class CompileResource extends Command {
 		final MSourceHighlights message = new MSourceHighlights();
 		BuildStatus buildStatus = invocation.get();
 
-		Log.println("BuildStatus: %s", buildStatus.getStatus().code());
-
-		//println(invocation.getStandardOut());
-
 		if (buildStatus.getStatus().code() != BuildStatus.Status.Ok.code()) {
 
-			//Log.println(buildStatus.getError());
+			InvocationReader<ModelInvocation<BuildStatus>> invocationReader = new InvocationReader<>(invocation);
 
-			List<MHighlight> highlights = searchXmlHighlights(invocation);
+			List<MHighlight> highlights = invocationReader.read(new XmlOutputReader());
 
-			if (highlights != null && !highlights.isEmpty())
-				message.addFailures(highlights);
+			Log.println("--->" + invocation.getErrString() + "<---");
+			Log.println("--->" + invocation.getOutString() + "<---");
 		}
 
 		return message;

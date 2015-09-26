@@ -23,8 +23,9 @@ public class CompileResourceTest {
 
 			assertThat(resourceCompile).isNotNull();*/
 
-			MSourceHighlights resourceCompile = client.read(MSourceHighlights.class);
-			assertThat(resourceCompile).isNotNull();
+			MSourceHighlights sourceHighlights = client.read(MSourceHighlights.class);
+			assertThat(sourceHighlights).isNotNull();
+			assertThat(sourceHighlights.failures).isNotNull();
 		}
 	}
 
@@ -33,8 +34,9 @@ public class CompileResourceTest {
 		try (Client client = new Client(RESOURCE_ERROR_01, 3455)) {
 			client.send(MCommand.from("compileResource"));
 
-			MSourceHighlights highlights = client.read(MSourceHighlights.class);
-			assertThat(highlights).isNotNull();
+			MSourceHighlights sourceHighlights = client.read(MSourceHighlights.class);
+			assertThat(sourceHighlights).isNotNull();
+			assertThat(sourceHighlights.failures).isNotNull();
 		}
 	}
 

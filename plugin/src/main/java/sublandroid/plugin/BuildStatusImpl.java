@@ -9,7 +9,10 @@ import sublandroid.plugin.util.*;
 import org.gradle.*;
 import org.gradle.api.*;
 import org.gradle.api.execution.*;
+import org.gradle.api.file.*;
 import org.gradle.api.invocation.*;
+import org.gradle.api.internal.changedetection.TaskArtifactState;
+import org.gradle.api.internal.TaskExecutionHistory;
 import org.gradle.api.internal.tasks.ContextAwareTaskAction;
 import org.gradle.api.internal.tasks.TaskExecutionContext;
 import org.gradle.api.internal.tasks.execution.TaskValidator;
@@ -287,7 +290,7 @@ BuildStatus, TaskExecutionGraphListener, Serializable {
 	}
 
 	/**
-	 * Argh...Something actions needs context
+	 * Argh...Some actions needs context
 	 */
 	private class ProxyActionContextAware extends ProxyAction implements ContextAwareTaskAction {
 

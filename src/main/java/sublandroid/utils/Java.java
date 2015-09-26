@@ -23,11 +23,27 @@ public abstract class Java extends Source {
 	protected static final Pattern JAVA_SEMANTIC_ERROR = Pattern.compile("^[^\\s]+\\s[^\\s]+\\sin\\sclass");
 
 	public static List<MHighlight> searchJavaHighlights(Command.ModelInvocation<BuildStatus> modelInvocation) {
-		return searchJavaHighlights(modelInvocation.getStandardErr());
+		return searchJavaHighlights(modelInvocation.getErr());
 	}
 
-	private static List<MHighlight> searchJavaHighlights(ByteArrayOutputStream byteArrayOutputStream) {
-		return searchJavaHighlights(new String(byteArrayOutputStream.toByteArray()));
+	private static List<MHighlight> searchJavaHighlights(InputStream inputStream) {
+		Reader reader = new InputStreamReader(inputStream);
+		final StringBuilder builder = new StringBuilder();
+		char[] buffer = new char[1024];
+
+		try {
+			int length = reader.read(buffer);
+			
+			while (length > 0) {
+				builder.append(buffer, 0, length);
+				length = reader.read(buffer);
+			}
+		} catch (IOException ioException) {
+			throw new RuntimeException(ioException);
+		}
+
+
+		return searchJavaHighlights(builder.toString());
 	}
 
 	private static List<MHighlight> searchJavaHighlights(String output) {

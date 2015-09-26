@@ -8,6 +8,24 @@ import org.gradle.tooling.model.*;
  * Capture any gradle errors for any tasks, well this tries!
  */
 public interface BuildStatus extends Model  {
+	
+	/**
+	 * Throwable caught
+	 */
+	public Error getError();
+
+	/**
+	 * Validation errros
+	 */
+	public List<String> getErrors();
+
+	public String getFailedTaskName();
+
+	public String getFailedTaskPath();
+
+	public Status getStatus();
+
+	public List<String> getTasks();
 
 	static interface Error extends java.io.Serializable {
 
@@ -20,7 +38,9 @@ public interface BuildStatus extends Model  {
 		String getType();
 	}
 
-	public static interface Status extends java.io.Serializable {
+	static interface Status extends java.io.Serializable {
+
+		String code();
 
 		static final Status ActionError = new Status() {
 			public String code() { return "ActionError"; }
@@ -37,20 +57,6 @@ public interface BuildStatus extends Model  {
 		static final Status ValidationError = new Status() {
 			public String code() { return "ValidationError"; }
 		};
-
-		String code();
 	}
-	
-	public Error getError();
-
-	public List<String> getErrors();
-
-	public String getFailedTaskName();
-
-	public String getFailedTaskPath();
-
-	public Status getStatus();
-
-	public List<String> getTasks();
 
 }

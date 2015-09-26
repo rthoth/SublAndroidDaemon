@@ -19,6 +19,12 @@ public abstract class Command {
 	protected static final Pattern LINE_BREAK_PATTERN = Pattern.compile("[\\r\\n]+");
 
 	public abstract Message execute(MCommand mCommand, ProjectConnection connection);
+
+	public static class CommandException extends RuntimeException {
+		public CommandException(Throwable cause) {
+			super(cause);
+		}
+	}
 	
 	/**
 	 * Gradle pre-invocation
@@ -100,16 +106,16 @@ public abstract class Command {
 			return new ByteArrayInputStream(standardErr.toByteArray());
 		}
 
+		public String getErrString() {
+			return standardErr.toString();
+		}
+
 		public InputStream getOut() {
 			return new ByteArrayInputStream(standardOut.toByteArray());
 		}
 
-		public ByteArrayOutputStream getStandardErr() {
-			return standardErr;
-		}
-
-		public ByteArrayOutputStream getStandardOut() {
-			return standardOut;
+		public String getOutString() {
+			return standardOut.toString();
 		}
 
 		protected <R extends LongRunningOperation> R setup(R operation) {

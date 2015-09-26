@@ -30,8 +30,6 @@ public class CompileJava extends Command {
 
 		BuildStatus buildStatus = invocation.get();
 
-		println("BuildStatus: %s", buildStatus.getStatus().code());
-
 		if (buildStatus.getStatus().code() != Status.Ok.code()) {
 
 			List<MHighlight> highlights = new InvocationReader(invocation)
